@@ -4,16 +4,16 @@
 #           - a faire...
 
 # TODO: Interface graphique :
-#           - Interface joueur :
-#               - Deux tableau (défense et attaque)
-#             ? - bateau ennemi -> restants/touchés/coulés
-#           - Menu : a définir
+# TODO:     - Interface joueur :
+# TODO:         - Deux tableau (défense et attaque)
+# TODO:       ? - bateau ennemi -> restants/touchés/coulés
+# TODO:     - Menu : a définir
 #           - autre ?
 
 
 # TODO: Analyser des données pour l'IA :
-#           - logique de début de partie (placement des bateau)
-#           - logique d'attaque
+# TODO:     - logique de début de partie (placement des bateau)
+# TODO:     - logique d'attaque
 #               - si pas touché -> - ?
 #               - si toucher -> jouer a coté
 #                       - si re toucher -> +
