@@ -3,6 +3,8 @@ from typing import Literal
 
 from utils.prompt import Prompt
 
+directions = Literal['horizontal', 'h', 'vertical', 'v']
+
 
 class Coordinate:
     Values: list
@@ -43,10 +45,10 @@ class Coordinates:
         self.x: Coordinates.Vertical = Coordinates.Vertical(x)
         self.y: Coordinates.Horizontal = Coordinates.Horizontal(y)
 
-    def __getitem__(self, direction: Literal['horizontal', 'vertical']) -> Coordinate:
-        if direction == 'vertical':
+    def __getitem__(self, direction: directions) -> Coordinate:
+        if direction == 'vertical' or direction == 'v':
             return self.y
-        elif direction == 'horizontal':
+        elif direction == 'horizontal' or direction == 'h':
             return self.x
         else:
             raise ValueError(f"Invalid direction: {direction}")

@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 
 from game.battleships import Ship, Carrier, Battleship, Destroyer, Submarine, PatrolBoat
-from game.board.coordinates import Coordinates
+from game.board.coordinates import Coordinates, directions
 from game.exceptions import GameException
 from utils.prompt import Prompt, clear
 
@@ -61,9 +61,9 @@ class Grid:
 
                 while True:
                     try:
-                        self._place_boat(ship,
-                                         self._select_direction(),
-                                         Coordinates.select())
+                        self.place_boat(ship,
+                                        self.select_direction(),
+                                        Coordinates.select())
                         break
                     except Grid.Exceptions.Placement as e:
                         clear()
@@ -71,14 +71,14 @@ class Grid:
                         print(f'{self.grid}\n\n'
                               f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
 
-    def _place_boat(self, boat: Ship, direction: Literal['horizontal', 'vertical'], coordinates: Coordinates):
+    def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         try:
             end_coordinate = coordinates[direction] + (boat.size - 1)
 
             boat_placement: pd.Series
-            if direction == 'vertical':
+            if direction == 'vertical' or direction == 'v':
                 boat_placement = self.grid.loc[coordinates.y.value:end_coordinate, coordinates.x.value]
-            elif direction == 'horizontal':
+            elif direction == 'horizontal' or direction == 'h':
                 boat_placement = self.grid.loc[coordinates.y.value, coordinates.x.value:end_coordinate]
             else:
                 raise Grid.Exceptions.Placement(f'Wrong placement direction selected: {direction}.')
@@ -87,10 +87,10 @@ class Grid:
                 raise Grid.Exceptions.Placement(
                     f"{type(boat).__name__} cannot be placed here, there's already a boat here.")
 
-            if direction == 'vertical':
+            if direction == 'vertical' or direction == 'v':
                 self.grid.loc[boat_placement.index, coordinates.x.value] = [boat.uuid + i for i in
                                                                             range(1, boat.size + 1)]
-            elif direction == 'horizontal':
+            elif direction == 'horizontal' or direction == 'h':
                 self.grid.loc[coordinates.y.value, boat_placement.index] = [boat.uuid + i for i in
                                                                             range(1, boat.size + 1)]
             else:
@@ -100,9 +100,11 @@ class Grid:
             raise Grid.Exceptions.Placement(
                 f'{type(boat).__name__} cannot be placed here, as it would extend beyond the playing area.')
 
+        return self
+
     @staticmethod
-    def _select_direction() -> Literal['horizontal', 'vertical']:
-        return cast(Literal['horizontal', 'vertical'],
+    def select_direction() -> directions:
+        return cast(directions,
                     Prompt.select('Which way do you want to position your ship?',
                                   ['horizontal', 'vertical'],
                                   lambda x: x).element.lower())
