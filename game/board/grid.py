@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from enum import Enum
 
 import numpy as np
@@ -6,6 +7,23 @@ import pandas as pd
 from game.battleships import Ship
 from game.board.coordinates import Coordinates, directions
 from game.exceptions import GameException
+
+
+@dataclass
+class Case:
+    Value: float
+    IsEmpty: bool
+    IsShot: bool
+    ShipInfo: Ship.Data | None
+
+    def __repr__(self):
+        ship_info = repr(self.ShipInfo).replace('\n', "\n   ")
+        return (f'Case(\n'
+                f'   Value={self.Value},\n'
+                f'   IsEmpty={self.IsEmpty},\n'
+                f'   IsShot={self.IsShot},\n'
+                f'   ShipInfo={ship_info},\n'
+                f')')
 
 
 class Grid:
@@ -31,9 +49,17 @@ class Grid:
     def __repr__(self):
         return str(self.grid)
 
-    def __getitem__(self, key: tuple['Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']):
-        x, y = key
-        return self.grid.loc[y, x]
+    def __getitem__(self, keys: tuple['Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']):
+        x, y = keys
+        value = self.grid.loc[y, x]
+        is_empty = round(value, 2) == 0
+
+        return Case(
+            Value=value,
+            IsEmpty=is_empty,
+            IsShot=bool(int(abs(value * 1000) % 10)),
+            ShipInfo=Ship.get_data(value) if not is_empty else None,
+        )
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
@@ -55,11 +81,9 @@ class Grid:
                     f"{type(boat).__name__} cannot be placed here, there's already a boat here.")
 
             if direction == 'vertical' or direction == 'v':
-                self.grid.loc[boat_placement.index, coordinates.x] = [boat.uuid + i for i in
-                                                                       range(1, boat.size + 1)]
+                self.grid.loc[boat_placement.index, coordinates.x] = [boat.uuid + i for i in range(1, boat.size + 1)]
             elif direction == 'horizontal' or direction == 'h':
-                self.grid.loc[coordinates.y, boat_placement.index] = [boat.uuid + i for i in
-                                                                       range(1, boat.size + 1)]
+                self.grid.loc[coordinates.y, boat_placement.index] = [boat.uuid + i for i in range(1, boat.size + 1)]
             else:
                 raise Grid.Exceptions.Placement(f'Wrong placement direction selected: {direction}.')
 
