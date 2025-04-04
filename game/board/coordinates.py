@@ -49,19 +49,27 @@ class Coordinates:
     def __init__(self,
                  x: 'Coordinates.Vertical.Type',
                  y: 'Coordinates.Horizontal.Type'):
-        self.x: Coordinates.Vertical = Coordinates.Vertical(x)
-        self.y: Coordinates.Horizontal = Coordinates.Horizontal(y)
+        self._x: Coordinates.Vertical = Coordinates.Vertical(x)
+        self._y: Coordinates.Horizontal = Coordinates.Horizontal(y)
 
     def __getitem__(self, direction: directions) -> Coordinate:
         if direction == 'vertical' or direction == 'v':
-            return self.y
+            return self._y
         elif direction == 'horizontal' or direction == 'h':
-            return self.x
+            return self._x
         else:
             raise ValueError(f"Invalid direction: {direction}")
 
     def __str__(self):
-        return f'{self.x} {self.y}'
+        return f'{self._x} {self._y}'
+
+    @property
+    def x(self):
+        return self._x.value
+
+    @property
+    def y(self):
+        return self._y.value
 
     @staticmethod
     def select() -> 'Coordinates':

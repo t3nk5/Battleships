@@ -44,9 +44,9 @@ class Grid:
 
             boat_placement: pd.Series
             if direction == 'vertical' or direction == 'v':
-                boat_placement = self.grid.loc[coordinates.y.value:end_coordinate, coordinates.x.value]
+                boat_placement = self.grid.loc[coordinates.y:end_coordinate, coordinates.x]
             elif direction == 'horizontal' or direction == 'h':
-                boat_placement = self.grid.loc[coordinates.y.value, coordinates.x.value:end_coordinate]
+                boat_placement = self.grid.loc[coordinates.y, coordinates.x:end_coordinate]
             else:
                 raise Grid.Exceptions.Placement(f'Wrong placement direction selected: {direction}.')
 
@@ -55,11 +55,11 @@ class Grid:
                     f"{type(boat).__name__} cannot be placed here, there's already a boat here.")
 
             if direction == 'vertical' or direction == 'v':
-                self.grid.loc[boat_placement.index, coordinates.x.value] = [boat.uuid + i for i in
-                                                                            range(1, boat.size + 1)]
+                self.grid.loc[boat_placement.index, coordinates.x] = [boat.uuid + i for i in
+                                                                       range(1, boat.size + 1)]
             elif direction == 'horizontal' or direction == 'h':
-                self.grid.loc[coordinates.y.value, boat_placement.index] = [boat.uuid + i for i in
-                                                                            range(1, boat.size + 1)]
+                self.grid.loc[coordinates.y, boat_placement.index] = [boat.uuid + i for i in
+                                                                       range(1, boat.size + 1)]
             else:
                 raise Grid.Exceptions.Placement(f'Wrong placement direction selected: {direction}.')
 
