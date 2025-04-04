@@ -1,13 +1,11 @@
 from enum import Enum
-from typing import Literal, cast
 
 import numpy as np
 import pandas as pd
 
-from game.battleships import Ship, Carrier, Battleship, Destroyer, Submarine, PatrolBoat
+from game.battleships import Ship
 from game.board.coordinates import Coordinates, directions
 from game.exceptions import GameException
-from utils.prompt import Prompt, clear
 
 
 class Grid:
@@ -37,41 +35,10 @@ class Grid:
         x, y = key
         return self.grid.loc[y, x]
 
-    def initiate(self):
-        if self.type == Grid.Type.OFFENSIVE:
-            raise Grid.Exceptions.Initiation('an “OFFENSIVE” grid cannot be initialized')
-
-        ships = {
-            Carrier: 1,
-            Battleship: 1,
-            Destroyer: 2,
-            Submarine: 1,
-            PatrolBoat: 1,
-        }
-
-        boat_id = 0
-        for ship_type, number in ships.items():
-            for i in range(number):
-                boat_id += 1
-                ship = ship_type(ship_id=boat_id)
-
-                clear()
-                print(f'{self.grid}\n\n'
-                      f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
-
-                while True:
-                    try:
-                        self.place_boat(ship,
-                                        self.select_direction(),
-                                        Coordinates.select())
-                        break
-                    except Grid.Exceptions.Placement as e:
-                        clear()
-                        print(e.message)
-                        print(f'{self.grid}\n\n'
-                              f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
-
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
+        if self.type != Grid.Type.DEFENSIVE:
+            raise Grid.Exceptions.Initiation('A grid must be “DEFENSIVE” to accommodate a boat.')
+
         try:
             end_coordinate = coordinates[direction] + (boat.size - 1)
 
@@ -101,10 +68,3 @@ class Grid:
                 f'{type(boat).__name__} cannot be placed here, as it would extend beyond the playing area.')
 
         return self
-
-    @staticmethod
-    def select_direction() -> directions:
-        return cast(directions,
-                    Prompt.select('Which way do you want to position your ship?',
-                                  ['horizontal', 'vertical'],
-                                  lambda x: x).element.lower())

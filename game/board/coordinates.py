@@ -1,9 +1,16 @@
 import re
-from typing import Literal
+from typing import Literal, cast
 
 from utils.prompt import Prompt
 
 directions = Literal['horizontal', 'h', 'vertical', 'v']
+
+
+def select_direction() -> directions:
+    return cast(directions,
+                Prompt.select('Which way do you want to position your ship?',
+                              ['horizontal', 'vertical'],
+                              lambda x: x).element.lower())
 
 
 class Coordinate:
