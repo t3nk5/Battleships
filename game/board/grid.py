@@ -9,21 +9,35 @@ from game.board.coordinates import Coordinates, directions
 from game.exceptions import GameException
 
 
-@dataclass
 class Case:
-    Value: float
-    IsEmpty: bool
-    IsShot: bool
-    ShipInfo: Ship.Data | None
+    @dataclass
+    class Offensive:
+        Value: float
+        IsShot: bool
+        IsTouch: bool
 
-    def __repr__(self):
-        ship_info = repr(self.ShipInfo).replace('\n', "\n   ")
-        return (f'Case(\n'
-                f'   Value={self.Value},\n'
-                f'   IsEmpty={self.IsEmpty},\n'
-                f'   IsShot={self.IsShot},\n'
-                f'   ShipInfo={ship_info},\n'
-                f')')
+        def __repr__(self):
+            return (f'Case(\n'
+                    f'   Value={self.Value},\n'
+                    f'   IsShot={self.IsShot},\n'
+                    f'   IsTouch={self.IsTouch},\n'
+                    f')')
+
+    @dataclass
+    class Defensive:
+        Value: float
+        IsEmpty: bool
+        IsShot: bool
+        ShipInfo: Ship.Data | None
+
+        def __repr__(self):
+            ship_info = repr(self.ShipInfo).replace('\n', "\n   ")
+            return (f'Case(\n'
+                    f'   Value={self.Value},\n'
+                    f'   IsEmpty={self.IsEmpty},\n'
+                    f'   IsShot={self.IsShot},\n'
+                    f'   ShipInfo={ship_info},\n'
+                    f')')
 
 
 class Grid:
@@ -49,17 +63,28 @@ class Grid:
     def __repr__(self):
         return str(self.grid)
 
-    def __getitem__(self, keys: tuple['Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']):
+    def __getitem__(self, keys: tuple[
+        'Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']) -> Case.Offensive | Case.Defensive | Case.Offensive:
         x, y = keys
         value = self.grid.loc[y, x]
-        is_empty = round(value, 2) == 0
 
-        return Case(
-            Value=value,
-            IsEmpty=is_empty,
-            IsShot=bool(int(abs(value * 1000) % 10)),
-            ShipInfo=Ship.get_data(value) if not is_empty else None,
-        )
+        match self.type:
+            case Grid.Type.OFFENSIVE:
+                return Case.Offensive(
+                    Value=value,
+                    IsShot=bool(int(abs(value)) % 10),
+                    IsTouch=bool(int(abs(value) * 10) % 10),
+                )
+            case Grid.Type.DEFENSIVE:
+                is_empty = round(value, 2) == 0
+                return Case.Defensive(
+                    Value=value,
+                    IsEmpty=is_empty,
+                    IsShot=bool(int(abs(value * 1000) % 10)),
+                    ShipInfo=Ship.get_data(value) if not is_empty else None,
+                )
+            case _:
+                raise ValueError(f'Invalid grid type: {self.type}')
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
@@ -92,3 +117,23 @@ class Grid:
                 f'{type(boat).__name__} cannot be placed here, as it would extend beyond the playing area.')
 
         return self
+
+    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> bool | None:
+        match self.type:
+            case Grid.Type.OFFENSIVE:
+                if touched is not None:
+                    self.grid.loc[coordinates.y, coordinates.x] = 1 + (0.1 if touched else 0)
+                return None
+            case Grid.Type.DEFENSIVE:
+                case_info = self[coordinates.x, coordinates.y]
+
+                if case_info.IsShot: return None
+
+                self.grid.loc[coordinates.y, coordinates.x] += 0.001
+
+                if not case_info.IsEmpty:
+                    self.grid.loc[coordinates.y, coordinates.x] *= -1
+                    return True
+                return False
+            case _:
+                raise ValueError(f'Invalid grid type: {self.type}')
