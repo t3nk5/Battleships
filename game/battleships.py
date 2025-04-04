@@ -19,13 +19,25 @@ class Ship:
         Index: int
         ID: int
 
+        def __repr__(self):
+            return (f'Ship.Data(\n'
+                    f'   Alive={self.Alive},\n'
+                    f'   Size={self.Size},\n'
+                    f'   Type={self.Type},\n'
+                    f'   Index={self.Index},\n'
+                    f'   ID={self.ID}\n'
+                    f')')
+
     @staticmethod
     def get_data(uuid: float):
-        return Ship.Data(Alive=uuid > 0,
-                         Size=(uuid // 100) % 100,
-                         Type=(uuid // 10) % 10,
-                         Index=int(uuid) % 10,
-                         ID=int(str(uuid).split('.')[1]))
+        value = abs(uuid)
+        return Ship.Data(
+            Alive=uuid > 0,
+            Size=(value // 100) % 100,
+            Type=(value // 10) % 10,
+            Index=int(value) % 10,
+            ID=int(value * 100 % 100)
+        )
 
 
 class Carrier(Ship):  # 1
