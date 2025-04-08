@@ -86,6 +86,28 @@ class Grid:
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
 
+    @property
+    def ships(self):
+        if self.type != Grid.Type.DEFENSIVE:
+            raise Grid.Exceptions.Initiation(f'Only "DEFENSIVE" grids contain boats. Current type: {self.type}')
+
+        return pd.DataFrame.from_dict(
+            pd.DataFrame([{'uuid': val, 'ID': data.ID, 'Index': data.Index}
+                          for _, row in self.grid.iterrows()
+                          for _, val in row.items()
+                          if round(val, 2) != 0
+                          if (data := Ship.case_data(val))])
+            .sort_values(['ID', 'Index'])
+            .groupby('ID')['uuid'].apply(list)
+            .to_dict(), orient='index').transpose()
+
+    @property
+    def alive(self) -> bool:
+        if self.type != Grid.Type.DEFENSIVE:
+            raise Grid.Exceptions.Initiation(
+                f'Only "DEFENSIVE" grids can be considered as ‘alive’. Current type: {self.type}')
+        return any(self.ships.apply(lambda s: Ship.ship_data(s).Alive))
+
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
             raise Grid.Exceptions.Initiation('A grid must be “DEFENSIVE” to accommodate a boat.')
