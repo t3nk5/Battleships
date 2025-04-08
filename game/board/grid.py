@@ -81,7 +81,7 @@ class Grid:
                     Value=value,
                     IsEmpty=is_empty,
                     IsShot=bool(int(abs(value * 1000) % 10)),
-                    ShipInfo=Ship.get_data(value) if not is_empty else None,
+                    ShipInfo=Ship.case_data(value) if not is_empty else None,
                 )
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
