@@ -5,7 +5,7 @@ from typing import Union
 import numpy as np
 import pandas as pd
 
-from game.battleships import Ship
+from game.board.battleships import Ship
 from game.board.coordinates import Coordinates, directions
 from game.exceptions import GameException
 

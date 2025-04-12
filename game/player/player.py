@@ -1,4 +1,4 @@
-from game.battleships import Battleship, Carrier, Destroyer, Submarine, PatrolBoat
+from game.board.battleships import Battleship, Carrier, Destroyer, Submarine, PatrolBoat
 from game.board.coordinates import Coordinates, select_direction
 from game.board.grid import Grid, ShotResult
 from utils.prompt import clear
