@@ -1,9 +1,14 @@
 import os
 from dataclasses import dataclass
+from time import sleep
 from typing import Callable, TypeVar, List, Type
 
 T = TypeVar('T', int, float, str)
-clear = lambda: os.system('cls')
+
+
+def clear(time: float = 0):
+    sleep(time)
+    os.system('cls')
 
 
 class Prompt:
