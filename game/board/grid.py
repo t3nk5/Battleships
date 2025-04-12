@@ -47,6 +47,8 @@ class Grid:
 
         class Placement(GameException): pass
 
+        class Type(GameException): pass
+
     class Type(Enum):
         OFFENSIVE = 0
         DEFENSIVE = 1
@@ -91,7 +93,9 @@ class Grid:
     @property
     def ships(self):
         if self.type != Grid.Type.DEFENSIVE:
-            raise Grid.Exceptions.Initiation(f'Only "DEFENSIVE" grids contain boats. Current type: {self.type}')
+            raise Grid.Exceptions.Type(f'Only "DEFENSIVE" grids contain boats. Current type: {self.type}')
+        if not self.initialized:
+            raise Grid.Exceptions.Initiation('Grid must be initialized to retrieve the boats.')
 
         return pd.DataFrame.from_dict(
             pd.DataFrame([{'uuid': val, 'ID': data.ID, 'index': data.index}
@@ -106,13 +110,13 @@ class Grid:
     @property
     def alive(self) -> bool:
         if self.type != Grid.Type.DEFENSIVE:
-            raise Grid.Exceptions.Initiation(
+            raise Grid.Exceptions.Type(
                 f'Only "DEFENSIVE" grids can be considered as ‘alive’. Current type: {self.type}')
         return any(self.ships.apply(lambda s: Ship.ship_data(s).alive))
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
-            raise Grid.Exceptions.Initiation('A grid must be “DEFENSIVE” to accommodate a boat.')
+            raise Grid.Exceptions.Type('A grid must be “DEFENSIVE” to accommodate a boat.')
 
         try:
             end_coordinate = coordinates[direction] + (boat.size - 1)
