@@ -60,6 +60,7 @@ class Grid:
         )
         self.grid.columns.name = 'X'
         self.grid.index.name = 'Y'
+        self.initialized: bool = not self.type == Grid.Type.DEFENSIVE
 
     def __repr__(self):
         return str(self.grid)

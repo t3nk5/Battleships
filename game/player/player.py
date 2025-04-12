@@ -39,6 +39,8 @@ class Player:
                         print(f'{self.defensive_grid}\n\n'
                               f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
 
+        self.defensive_grid.initialized = True
+
     def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None) -> ShotResult:
         coordinates = coordinates or Coordinates.select()
         result = player_attacked.defensive_grid.get_shot(coordinates)
