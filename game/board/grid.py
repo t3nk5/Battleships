@@ -17,6 +17,9 @@ class Case:
         is_shot: bool
         is_touch: bool
 
+        def __str__(self):
+            return 'X' if self.is_touch else '*' if self.is_shot else ' '
+
         def __repr__(self):
             return (f'Case(\n'
                     f'   Value={self.value},\n'
@@ -30,6 +33,11 @@ class Case:
         is_empty: bool
         is_shot: bool
         ship_info: Ship.Data | None
+
+        def __str__(self):
+            if self.is_empty:
+                return '*' if self.is_shot else ' '
+            return 'X' if self.is_shot else 'o'
 
         def __repr__(self):
             ship_info = repr(self.ship_info).replace('\n', "\n   ")
@@ -63,6 +71,17 @@ class Grid:
         self.grid.columns.name = 'X'
         self.grid.index.name = 'Y'
         self.initialized: bool = not self.type == Grid.Type.DEFENSIVE
+
+    def __str__(self):
+        df = pd.DataFrame({
+            x: {
+                y: self[x, y]
+                for y in self.grid.index
+            }
+            for x in self.grid.columns
+        })
+
+        return str(df) + ('\nNot initialized' if not self.initialized else '')
 
     def __repr__(self):
         return str(self.grid)

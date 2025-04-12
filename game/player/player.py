@@ -10,6 +10,12 @@ class Player:
         self.defensive_grid = Grid(Grid.Type.DEFENSIVE)
         self.offensive_grid = Grid(Grid.Type.OFFENSIVE)
 
+    def __str__(self):
+        return (f'Offensive grid:\n'
+                f'{self.offensive_grid}'
+                f'\n\nDefensive grid:\n'
+                f'{self.defensive_grid}')
+
     def initiate_grid(self):
         ships = {
             Carrier: 1,
@@ -26,18 +32,17 @@ class Player:
                 ship = ship_type(ship_id=boat_id)
 
                 clear()
-                print(f'{self.defensive_grid}\n\n'
-                      f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
-
                 while True:
+                    print(f'{self.name} grid initialization:', end='\n\n')
+                    print(f'{self.defensive_grid}', end='\n\n')
+                    print(f'You are currently placing a {type(ship).__name__} => size: {ship.size}', end='\n\n')
+
                     try:
                         self.defensive_grid.place_boat(ship, select_direction(), Coordinates.select())
                         break
                     except Grid.Exceptions.Placement as e:
                         clear()
-                        print(e.message)
-                        print(f'{self.defensive_grid}\n\n'
-                              f'You are currently placing a {type(ship).__name__} => size: {ship.size}\n')
+                        print(e.message, end='\n\n')
 
         self.defensive_grid.initialized = True
 
