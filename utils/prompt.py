@@ -18,7 +18,7 @@ class Prompt:
         element: T
 
     @staticmethod
-    def select(prompt: str, choices: List[T], display_func: Callable[[T], str]) -> SelectOutput:
+    def select(prompt: str, choices: List[T], display_func: Callable[[T], str] = lambda x: str(x)) -> SelectOutput:
         if not choices:
             raise IndexError("You must have at least one choice")
         if len(choices) == 1:
@@ -47,11 +47,11 @@ class Prompt:
 
     @staticmethod
     def get(prompt: str, *, expected_type: Type[T], excluded_condition: Callable[[T], bool] = lambda _: False,
-            formated: Callable[[T], T] = lambda x: x) -> T:
+            formated: Callable[[T], T] = lambda x: x, authorized_empty_entry: bool = False) -> T:
         while True:
             try:
                 value = input(f"{prompt} ").strip()
-                if not value:
+                if not value and not authorized_empty_entry:
                     raise ValueError("Unauthorized empty entry")
 
                 converted_value = expected_type(value)

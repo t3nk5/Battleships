@@ -42,13 +42,13 @@ class Game:
             player.initiate_grid()
             sleep(0.5)
             print(f"{player.name}'s grid initialized !")
-            sleep(2)
+            sleep(1.5)
         clear(1)
         print(f'Grids initialized !')
 
     def play(self):
         while True:
-            clear(3)
+            clear(2)
             print(f'Player {self.current_player.name} turn:\n')
             print(self.current_player)
             print()
@@ -67,3 +67,5 @@ class Game:
               f'{self.current_player.defensive_grid}\n')
         print(f'Player {self.next_player.name} grid:\n'
               f'{self.next_player.defensive_grid}')
+        print()
+        Prompt.get('Press enter to continue', expected_type=str, authorized_empty_entry=True)
