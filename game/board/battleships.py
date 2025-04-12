@@ -1,5 +1,5 @@
 from pandas import Series
-from pydantic.dataclasses import dataclass, overload
+from pydantic.dataclasses import dataclass
 
 
 class Ship:

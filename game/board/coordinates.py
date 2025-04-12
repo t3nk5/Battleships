@@ -47,8 +47,8 @@ class Coordinates:
             super().__init__(value)
 
     def __init__(self,
-                 x: 'Coordinates.Vertical.type',
-                 y: 'Coordinates.Horizontal.type'):
+                 x: 'Coordinates.Vertical.Type',
+                 y: 'Coordinates.Horizontal.Type'):
         self._x: Coordinates.Vertical = Coordinates.Vertical(x)
         self._y: Coordinates.Horizontal = Coordinates.Horizontal(y)
 
