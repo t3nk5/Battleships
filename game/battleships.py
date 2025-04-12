@@ -14,18 +14,18 @@ class Ship:
 
     @dataclass
     class Data:
-        Alive: bool
-        Size: int
-        Type: int
-        Index: int | None
+        alive: bool
+        size: int
+        type: int
+        index: int | None
         ID: int
 
         def __repr__(self):
             return (f'Ship.Data(\n'
-                    f'   Alive={self.Alive},\n'
-                    f'   Size={self.Size},\n'
-                    f'   Type={self.Type},\n'
-                    f'   Index={self.Index},\n'
+                    f'   Alive={self.alive},\n'
+                    f'   Size={self.size},\n'
+                    f'   Type={self.type},\n'
+                    f'   Index={self.index},\n'
                     f'   ID={self.ID}\n'
                     f')')
 
@@ -33,23 +33,23 @@ class Ship:
     def case_data(uuid: float) -> 'Ship.Data':
         value = abs(uuid)
         return Ship.Data(
-            Alive=uuid > 0,
-            Size=(value // 100) % 100,
-            Type=(value // 10) % 10,
-            Index=int(value) % 10,
-            ID=int(value * 100 % 100)
+            alive=uuid > 0,
+            size=(value // 100) % 100,
+            type=(value // 10) % 10,
+            index=round(value, 0) % 10,
+            ID=round(value * 100 % 100, 0)
         )
 
     @staticmethod
     def ship_data(ship: Series) -> 'Ship.Data':
         ship = ship[ship.notna()].apply(lambda x: Ship.case_data(x))
         return Ship.Data(
-            Alive=any(s.Alive for s in ship),
-            Size=(lambda s: s.iloc[0] if s.nunique() == 1 else (_ for _ in ()).throw(
-                ValueError(f'the Size attribute is not unique : {s.unique()}')))(ship.map(lambda d: d.Size)),
-            Type=(lambda s: s.iloc[0] if s.nunique() == 1 else (_ for _ in ()).throw(
-                ValueError(f'the Type attribute is not unique : {s.unique()}')))(ship.map(lambda d: d.Type)),
-            Index=None,
+            alive=any(s.alive for s in ship),
+            size=(lambda s: s.iloc[0] if s.nunique() == 1 else (_ for _ in ()).throw(
+                ValueError(f'the Size attribute is not unique : {s.unique()}')))(ship.map(lambda d: d.size)),
+            type=(lambda s: s.iloc[0] if s.nunique() == 1 else (_ for _ in ()).throw(
+                ValueError(f'the Type attribute is not unique : {s.unique()}')))(ship.map(lambda d: d.type)),
+            index=None,
             ID=(lambda s: s.iloc[0] if s.nunique() == 1 else (_ for _ in ()).throw(
                 ValueError(f'the ID attribute is not unique : {s.unique()}')))(ship.map(lambda d: d.ID)),
         )

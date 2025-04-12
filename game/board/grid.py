@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
+from typing import Union
 
 import numpy as np
 import pandas as pd
@@ -12,30 +13,30 @@ from game.exceptions import GameException
 class Case:
     @dataclass
     class Offensive:
-        Value: float
-        IsShot: bool
-        IsTouch: bool
+        value: float
+        is_shot: bool
+        is_touch: bool
 
         def __repr__(self):
             return (f'Case(\n'
-                    f'   Value={self.Value},\n'
-                    f'   IsShot={self.IsShot},\n'
-                    f'   IsTouch={self.IsTouch},\n'
+                    f'   Value={self.value},\n'
+                    f'   IsShot={self.is_shot},\n'
+                    f'   IsTouch={self.is_touch},\n'
                     f')')
 
     @dataclass
     class Defensive:
-        Value: float
-        IsEmpty: bool
-        IsShot: bool
-        ShipInfo: Ship.Data | None
+        value: float
+        is_empty: bool
+        is_shot: bool
+        ship_info: Ship.Data | None
 
         def __repr__(self):
-            ship_info = repr(self.ShipInfo).replace('\n', "\n   ")
+            ship_info = repr(self.ship_info).replace('\n', "\n   ")
             return (f'Case(\n'
-                    f'   Value={self.Value},\n'
-                    f'   IsEmpty={self.IsEmpty},\n'
-                    f'   IsShot={self.IsShot},\n'
+                    f'   Value={self.value},\n'
+                    f'   IsEmpty={self.is_empty},\n'
+                    f'   IsShot={self.is_shot},\n'
                     f'   ShipInfo={ship_info},\n'
                     f')')
 
@@ -71,17 +72,17 @@ class Grid:
         match self.type:
             case Grid.Type.OFFENSIVE:
                 return Case.Offensive(
-                    Value=value,
-                    IsShot=bool(int(abs(value)) % 10),
-                    IsTouch=bool(int(abs(value) * 10) % 10),
+                    value=value,
+                    is_shot=bool(round(abs(value), 0) % 10),
+                    is_touch=bool(round(abs(value) * 10, 0) % 10),
                 )
             case Grid.Type.DEFENSIVE:
                 is_empty = round(value, 2) == 0
                 return Case.Defensive(
-                    Value=value,
-                    IsEmpty=is_empty,
-                    IsShot=bool(int(abs(value * 1000) % 10)),
-                    ShipInfo=Ship.case_data(value) if not is_empty else None,
+                    value=value,
+                    is_empty=is_empty,
+                    is_shot=bool(round(abs(value * 1000) % 10, 0)),
+                    ship_info=Ship.case_data(value) if not is_empty else None,
                 )
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
@@ -92,12 +93,12 @@ class Grid:
             raise Grid.Exceptions.Initiation(f'Only "DEFENSIVE" grids contain boats. Current type: {self.type}')
 
         return pd.DataFrame.from_dict(
-            pd.DataFrame([{'uuid': val, 'ID': data.ID, 'Index': data.Index}
+            pd.DataFrame([{'uuid': val, 'ID': data.ID, 'index': data.index}
                           for _, row in self.grid.iterrows()
                           for _, val in row.items()
                           if round(val, 2) != 0
                           if (data := Ship.case_data(val))])
-            .sort_values(['ID', 'Index'])
+            .sort_values(['ID', 'index'])
             .groupby('ID')['uuid'].apply(list)
             .to_dict(), orient='index').transpose()
 
@@ -106,7 +107,7 @@ class Grid:
         if self.type != Grid.Type.DEFENSIVE:
             raise Grid.Exceptions.Initiation(
                 f'Only "DEFENSIVE" grids can be considered as ‘alive’. Current type: {self.type}')
-        return any(self.ships.apply(lambda s: Ship.ship_data(s).Alive))
+        return any(self.ships.apply(lambda s: Ship.ship_data(s).alive))
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
@@ -140,7 +141,7 @@ class Grid:
 
         return self
 
-    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> bool | None:
+    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> Union['ShotResult', None]:
         match self.type:
             case Grid.Type.OFFENSIVE:
                 if touched is not None:
@@ -149,13 +150,26 @@ class Grid:
             case Grid.Type.DEFENSIVE:
                 case_info = self[coordinates.x, coordinates.y]
 
-                if case_info.IsShot: return None
+                if case_info.is_shot: return ShotResult(already_shot=True)
 
                 self.grid.loc[coordinates.y, coordinates.x] += 0.001
 
-                if not case_info.IsEmpty:
+                if not case_info.is_empty:
                     self.grid.loc[coordinates.y, coordinates.x] *= -1
-                    return True
-                return False
+                    return ShotResult(
+                        touched=True,
+                        sunken=not Ship.ship_data(
+                            self.ships[
+                                Ship.case_data(self.grid.loc[coordinates.y, coordinates.x]).ID
+                            ]).alive
+                    )
+                return ShotResult()
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+
+
+@dataclass
+class ShotResult:
+    already_shot: bool = False
+    touched: bool = False
+    sunken: bool = False
