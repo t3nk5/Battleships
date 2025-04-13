@@ -174,26 +174,44 @@ class Grid:
             case Grid.Type.DEFENSIVE:
                 case_info = self[coordinates.x, coordinates.y]
 
-                if case_info.is_shot: return ShotResult(already_shot=True)
+                if case_info.is_shot: return ShotResult(coordinates=coordinates, already_shot=True)
 
                 self.grid.loc[coordinates.y, coordinates.x] += 0.001
 
                 if not case_info.is_empty:
                     self.grid.loc[coordinates.y, coordinates.x] *= -1
                     return ShotResult(
+                        coordinates=coordinates,
                         touched=True,
                         sunken=not Ship.ship_data(
                             self.ships[
                                 Ship.case_data(self.grid.loc[coordinates.y, coordinates.x]).ID
                             ]).alive
                     )
-                return ShotResult()
+                return ShotResult(coordinates=coordinates)
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
 
 
 @dataclass
 class ShotResult:
+    coordinates: Coordinates
     already_shot: bool = False
     touched: bool = False
     sunken: bool = False
+
+    def __repr__(self):
+        return (f'{self.coordinates}'
+                f'.{int(self.already_shot)}'
+                f'.{int(self.touched)}'
+                f'.{int(self.sunken)}')
+
+    @staticmethod
+    def parse(s: str) -> 'ShotResult':
+        values = s.split('.')
+        return ShotResult(
+            coordinates=Coordinates.parse(values[0]),
+            already_shot=bool(int(values[1])),
+            touched=bool(int(values[2])),
+            sunken=bool(int(values[3])),
+        )
