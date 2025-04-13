@@ -17,6 +17,8 @@ class Player:
                 f'{self.defensive_grid}')
 
     def initiate_grid(self):
+        if self.defensive_grid.initialized: return
+
         ships = {
             Carrier: 1,
             Battleship: 1,
