@@ -1,6 +1,8 @@
 from time import sleep
 from typing import Literal
 
+import pandas as pd
+
 from game.player.player import Player
 from utils.prompt import Prompt, clear
 
@@ -10,6 +12,9 @@ class Game:
         self.mode = mode
         self.players: list[Player] = []
         self._player_index = 0
+        self.turn_index = 0
+        self.actions = pd.DataFrame(columns=[0, 1])
+
     @property
     def current_player(self) -> Player:
         return self.players[self._player_index]
@@ -46,6 +51,7 @@ class Game:
             sleep(1.5)
         clear(1)
         print(f'Grids initialized !')
+        self.turn_index = 1
 
     def turn(self):
         clear(2)
@@ -55,6 +61,8 @@ class Game:
 
         result = self.current_player.shot(self.next_player)
         print(('Touched' + (', Sunk' if result.sunken else '') if result.touched else 'Missed') + ' !')
+        self.actions.loc[int(self.turn_index), self._player_index] = result
+        self.turn_index += 0.5
 
     def play(self):
         while True:
