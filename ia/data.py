@@ -28,10 +28,7 @@ class Data:
     @staticmethod
     def load():
         try:
-            Data().games = pd.read_csv(Data.__files['games'], sep=';', index_col=0)
-            Data().games.columns = pd.MultiIndex.from_tuples([eval(col) for col in Data().games.columns],
-                                                             names=["game_index", "player_index"])
-
+            Data().games = pd.read_csv(Data.__files['games'], sep=';', header=[0, 1], index_col=0)
             print('Data loaded.')
         except FileNotFoundError:
             print('No data found.')
@@ -47,12 +44,12 @@ class Data:
     def add(game: Game):  # error due to circular import, fixed by __future__. Does not block correct script execution.
         actions = game.actions.copy()
 
-        if actions.shape[0] > Data().games.shape[0]:
-            Data().games = Data().games.reindex(range(1, actions.shape[0] + 1))
+        if (actions_index_size := len(actions.index)) > (games_index_size := len(Data().games)):
+            Data().games = Data().games.reindex(range(1, actions_index_size + 1))
         else:
-            actions = actions.reindex(range(1, Data().games.shape[0] + 1))
+            actions = actions.reindex(range(1, games_index_size + 1))
 
-        game_index = Data().games.shape[1] // 2 + 1
-        actions = actions.set_axis(pd.MultiIndex.from_product([[game_index], actions.columns]), axis=1)
+        game_index = len(Data().games.columns) // 2 + 1
+        actions.columns = pd.MultiIndex.from_product([[game_index], actions.columns], names=Data().games.columns.names)
         Data().games = pd.concat([Data().games, actions], axis=1)
         return Data()
