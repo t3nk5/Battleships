@@ -8,7 +8,7 @@ def play_game():
     game.initiate()
     game.play()
     game.end()
-    Data.add(game)
+    Data.add(game).save()
 
 
 if __name__ == "__main__":

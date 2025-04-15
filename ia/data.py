@@ -7,7 +7,7 @@ class Data:
     __instance: 'Data' = None
     __initialized = False
     __files: dict[str, str] = {
-        'games': './ia/data/games.csv',
+        'shots': './ia/data/shots.csv',
     }
 
     def __new__(cls):
@@ -17,18 +17,18 @@ class Data:
 
     def __init__(self):
         if not self.__initialized:
-            self.games = pd.DataFrame(
+            self.shots = pd.DataFrame(
                 columns=pd.MultiIndex.from_tuples([], names=["game_index", "player_index"])
             )
             Data.__initialized = True
 
     def __repr__(self):
-        return str(self.games)
+        return str(self.shots)
 
     @staticmethod
     def load():
         try:
-            Data().games = pd.read_csv(Data.__files['games'], sep=';', header=[0, 1], index_col=0)
+            Data().shots = pd.read_csv(Data.__files['shots'], sep=';', header=[0, 1], index_col=0)
             print('Data loaded.')
         except FileNotFoundError:
             print('No data found.')
@@ -36,20 +36,23 @@ class Data:
 
     @staticmethod
     def save():
-        Data().games.to_csv(Data.__files['games'], sep=';')
+        Data().shots.to_csv(Data.__files['shots'], sep=';')
         print('Data saved.')
         return Data()
 
     @staticmethod
     def add(game: Game):  # error due to circular import, fixed by __future__. Does not block correct script execution.
-        actions = game.actions.copy()
+        return Data().__add_shots(game.datas)
 
-        if (actions_index_size := len(actions.index)) > (games_index_size := len(Data().games)):
-            Data().games = Data().games.reindex(range(1, actions_index_size + 1))
+    def __add_shots(self, data: dict[str, pd.DataFrame]):
+        shots = data['shots'].copy()
+
+        if (shots_index_size := len(shots.index)) > (games_index_size := len(self.shots)):
+            self.shots = self.shots.reindex(range(1, shots_index_size + 1))
         else:
-            actions = actions.reindex(range(1, games_index_size + 1))
+            shots = shots.reindex(range(1, games_index_size + 1))
 
-        game_index = len(Data().games.columns) // 2 + 1
-        actions.columns = pd.MultiIndex.from_product([[game_index], actions.columns], names=Data().games.columns.names)
-        Data().games = pd.concat([Data().games, actions], axis=1)
-        return Data()
+        game_index = len(self.shots.columns) // 2 + 1
+        shots.columns = pd.MultiIndex.from_product([[game_index], shots.columns], names=self.shots.columns.names)
+        self.shots = pd.concat([self.shots, shots], axis=1)
+        return self

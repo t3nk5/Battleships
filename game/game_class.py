@@ -13,7 +13,9 @@ class Game:
         self.players: list[Player] = []
         self._player_index = 0
         self.turn_index = 0
-        self.actions = pd.DataFrame(columns=[0, 1])
+        self.datas = {
+            'shots': pd.DataFrame(columns=[0, 1]),
+        }
 
     @property
     def current_player(self) -> Player:
@@ -59,9 +61,9 @@ class Game:
         print(self.current_player)
         print()
 
-        result = self.current_player.shot(self.next_player)
-        print(('Touched' + (', Sunk' if result.sunken else '') if result.touched else 'Missed') + ' !')
-        self.actions.loc[int(self.turn_index), self._player_index] = result
+        shot_result = self.current_player.shot(self.next_player)
+        print(('Touched' + (', Sunk' if shot_result.sunken else '') if shot_result.touched else 'Missed') + ' !')
+        self.datas['shots'].loc[int(self.turn_index), self._player_index] = shot_result
         self.turn_index += 0.5
 
     def play(self):
