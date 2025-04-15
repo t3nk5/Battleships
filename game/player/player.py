@@ -1,6 +1,6 @@
 from game.board.battleships import Battleship, Carrier, Destroyer, Submarine, PatrolBoat
 from game.board.coordinates import Coordinates, select_direction
-from game.board.grid import Grid, ShotResult
+from game.board.grid import Grid, ShotResultData
 from utils.prompt import clear
 
 
@@ -48,7 +48,7 @@ class Player:
 
         self.defensive_grid.initialized = True
 
-    def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None) -> ShotResult:
+    def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None) -> ShotResultData:
         coordinates = coordinates or Coordinates.select()
         result = player_attacked.defensive_grid.get_shot(coordinates)
         self.offensive_grid.get_shot(coordinates, result.touched)

@@ -165,7 +165,7 @@ class Grid:
 
         return self
 
-    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> Union['ShotResult', None]:
+    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> Union['ShotResultData', None]:
         match self.type:
             case Grid.Type.OFFENSIVE:
                 if touched is not None:
@@ -174,13 +174,13 @@ class Grid:
             case Grid.Type.DEFENSIVE:
                 case_info = self[coordinates.x, coordinates.y]
 
-                if case_info.is_shot: return ShotResult(coordinates=coordinates, already_shot=True)
+                if case_info.is_shot: return ShotResultData(coordinates=coordinates, already_shot=True)
 
                 self.grid.loc[coordinates.y, coordinates.x] += 0.001
 
                 if not case_info.is_empty:
                     self.grid.loc[coordinates.y, coordinates.x] *= -1
-                    return ShotResult(
+                    return ShotResultData(
                         coordinates=coordinates,
                         touched=True,
                         sunken=not Ship.ship_data(
@@ -188,13 +188,13 @@ class Grid:
                                 Ship.case_data(self.grid.loc[coordinates.y, coordinates.x]).ID
                             ]).alive
                     )
-                return ShotResult(coordinates=coordinates)
+                return ShotResultData(coordinates=coordinates)
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
 
 
 @dataclass
-class ShotResult:
+class ShotResultData:
     coordinates: Coordinates
     already_shot: bool = False
     touched: bool = False
@@ -207,9 +207,9 @@ class ShotResult:
                 f'.{int(self.sunken)}')
 
     @staticmethod
-    def parse(s: str) -> 'ShotResult':
+    def parse(s: str) -> 'ShotResultData':
         values = s.split('.')
-        return ShotResult(
+        return ShotResultData(
             coordinates=Coordinates.parse(values[0]),
             already_shot=bool(int(values[1])),
             touched=bool(int(values[2])),
