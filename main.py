@@ -10,25 +10,35 @@ def play_game():
     game.end()
     Data.add(game)
 
+
 if __name__ == "__main__":
-    Data.load()
-    clear(0)
+    try:
+        Data.load()
+        clear(0)
 
-    while True:
-        print(f'Welcome to Battleship Game !')
-        match Prompt.select(
-            'Select:',
-            choices=['Play a game', 'View statistics', 'Quit'],
-        ).element:
-            case 'Play a game':
-                clear(1)
-                play_game()
-            case 'View statistics':
-                print('Not Implemented yet')
-            case 'Quit':
-                Data.save()
-                print()
-                break
+        while True:
+            print(f'Welcome to Battleship Game !')
+            match Prompt.select(
+                'Select:',
+                choices=['Play a game', 'View statistics', 'Quit'],
+            ).element:
+                case 'Play a game':
+                    clear(1)
+                    play_game()
+                case 'View statistics':
+                    print('Not Implemented yet')
+                case 'Quit':
+                    print()
+                    break
 
-        clear(2)
+            clear(2)
+    except KeyboardInterrupt:
+        print('''
+
+===============================
+        Manual interrupt
+===============================
+''')
+
+    Data.save()
     print('Thanks for playing!')
