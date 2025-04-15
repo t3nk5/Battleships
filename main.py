@@ -1,4 +1,5 @@
 from game.game_class import Game
+from ia.data import Data
 from utils.prompt import clear, Prompt
 
 
@@ -7,9 +8,10 @@ def play_game():
     game.initiate()
     game.play()
     game.end()
-
+    Data.add(game)
 
 if __name__ == "__main__":
+    Data.load()
     clear(0)
 
     while True:
@@ -24,6 +26,7 @@ if __name__ == "__main__":
             case 'View statistics':
                 print('Not Implemented yet')
             case 'Quit':
+                Data.save()
                 print()
                 break
 
