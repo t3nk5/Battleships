@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from typing import Literal
+
 import pandas as pd
+
+from game.board.grid import ShipPlacementData, ShotResultData
+from game.game_class import Game
 
 
 class Data:
@@ -31,7 +36,28 @@ class Data:
             Data.__initialized = True
 
     def __repr__(self):
-        return str(self.shots)
+        return (
+            f"{'=' * 20} Placements {'=' * 20}\n{self.placements}\n\n"
+            f"{'=' * 22} Shots {'=' * 22}\n{self.shots}\n\n"
+            f"{'=' * 21} Results {'=' * 21}\n{self.results}"
+        )
+
+    def __getitem__(self, key: tuple[Literal['placements', 'shots', 'results'], int | None, Literal[0, 1] | None]):
+        df_name, game_index, player_index = key
+
+        df = getattr(self, df_name)
+
+        cols = df.columns
+        if game_index is None and player_index is None:
+            return df
+        elif player_index is None:
+            selected_cols = [col for col in cols if int(col[0]) == game_index]
+        elif game_index is None:
+            selected_cols = [col for col in cols if int(col[1]) == player_index]
+        else:
+            selected_cols = [(str(game_index), str(player_index))] if (str(game_index),
+                                                                       str(player_index)) in cols else []
+        return df[selected_cols]
 
     @staticmethod
     def load():
