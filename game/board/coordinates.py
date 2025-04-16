@@ -1,3 +1,4 @@
+import random
 import re
 from typing import Literal, cast, Union
 
@@ -11,6 +12,10 @@ def select_direction() -> directions:
                 Prompt.select('Which way do you want to position your ship?',
                               ['horizontal', 'vertical'],
                               lambda x: x).element.lower())
+
+
+def random_direction() -> directions:
+    return random.choice(['h', 'v'])
 
 
 class Coordinate:
@@ -107,3 +112,10 @@ class Coordinates:
 
         coordinates = parse_str(s)
         return Coordinates(coordinates[0], coordinates[1])
+
+    @staticmethod
+    def random():
+        return Coordinates(
+            x=random.choice(Coordinates.Vertical.Values),
+            y=random.choice(Coordinates.Horizontal.Values)
+        )
