@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union
+from typing import Union, cast
 
 import numpy as np
 import pandas as pd
@@ -87,7 +87,9 @@ class Grid:
         return str(self.grid)
 
     def __getitem__(self, keys: tuple[
-        'Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']) -> Case.Offensive | Case.Defensive | Case.Offensive:
+        'Coordinates.Vertical.Type',
+        'Coordinates.Horizontal.Type']
+                    ) -> Case.Offensive | Case.Defensive:
         x, y = keys
         value = self.grid.loc[y, x]
 
@@ -191,6 +193,30 @@ class Grid:
                 return ShotResultData(coordinates=coordinates)
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+
+
+@dataclass
+class ShipPlacementData:
+    ship_type: int
+    coordinates: Coordinates
+    axis: directions
+    death_turn: int | None = None
+
+    def __repr__(self):
+        return (f'{self.ship_type}'
+                f'.{self.coordinates}'
+                f'.{self.axis[0]}'
+                f'.{self.death_turn}')
+
+    @staticmethod
+    def parse(s: str) -> 'ShipPlacementData':
+        values = s.split('.')
+        return ShipPlacementData(
+            ship_type=int(values[0]),
+            coordinates=Coordinates.parse(values[1]),
+            axis=cast(directions, values[2]),
+            death_turn=int(values[3]) if values[3].isdigit() else None,
+        )
 
 
 @dataclass

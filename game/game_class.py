@@ -14,6 +14,7 @@ class Game:
         self._player_index = 0
         self.turn_index = 0
         self.datas = {
+            'placements': pd.DataFrame(columns=[0, 1]),
             'shots': pd.DataFrame(columns=[0, 1]),
         }
 
@@ -61,7 +62,7 @@ class Game:
         print(self.current_player)
         print()
 
-        shot_result = self.current_player.shot(self.next_player)
+        shot_result = self.current_player.shot(self.next_player, turn=int(self.turn_index))
         print(('Touched' + (', Sunk' if shot_result.sunken else '') if shot_result.touched else 'Missed') + ' !')
         self.datas['shots'].loc[int(self.turn_index), self._player_index] = shot_result
         self.turn_index += 0.5
@@ -79,7 +80,12 @@ class Game:
         print(f'Player {self.current_player.name} won !\n')
         print(f'Player {self.current_player.name} grid:\n'
               f'{self.current_player.defensive_grid}\n')
+
         print(f'Player {self.next_player.name} grid:\n'
               f'{self.next_player.defensive_grid}')
         print()
+
+        for index, player in enumerate(self.players):
+            self.datas['placements'][index] = player.ship_placement_datas
+
         Prompt.get('Press enter to continue', expected_type=str, authorized_empty_entry=True)
