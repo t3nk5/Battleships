@@ -82,10 +82,14 @@ class Data:
         return Data()
 
     @staticmethod
-    def add(game: Game):  # error due to circular import, fixed by __future__. Does not block correct script execution.
-        return Data().__add_shots(game.datas).__add_placements(game.datas).__add_result(game.datas)
+    def add(game: Game):
+        game_index = Data().__game_index
+        return (Data()
+                .__add_shots(game.datas, game_index)
+                .__add_placements(game.datas, game_index)
+                .__add_result(game.datas, game_index))
 
-    def __add_shots(self, data: dict[str, pd.DataFrame]):
+    def __add_shots(self, data: dict[str, pd.DataFrame], game_index: int):
         shots = data['shots'].copy()
 
         if (shots_index_size := len(shots.index)) > (games_index_size := len(self.shots)):
@@ -93,13 +97,12 @@ class Data:
         else:
             shots = shots.reindex(range(1, games_index_size + 1))
 
-        game_index = len(self.shots.columns) // 2 + 1
         shots.columns = pd.MultiIndex.from_product([[game_index], shots.columns],
                                                    names=self.shots.columns.names)
         self.shots = pd.concat([self.shots, shots], axis=1)
         return self
 
-    def __add_placements(self, data: dict[str, pd.DataFrame]):
+    def __add_placements(self, data: dict[str, pd.DataFrame], game_index: int):
         placements = data['placements'].copy()
 
         if (placements_index_size := len(placements.index)) > (games_index_size := len(self.placements)):
@@ -107,17 +110,23 @@ class Data:
         else:
             placements = placements.reindex(range(1, games_index_size + 1))
 
-        game_index = len(self.placements.columns) // 2 + 1
         placements.columns = pd.MultiIndex.from_product([[game_index], placements.columns],
                                                         names=self.placements.columns.names)
         self.placements = pd.concat([self.placements, placements], axis=1)
         return self
 
-    def __add_result(self, data: dict[str, pd.DataFrame]):
+    def __add_result(self, data: dict[str, pd.DataFrame], game_index: int):
         result = data['result'].copy()
 
-        game_index = len(self.results.columns) // 2 + 1
         result.columns = pd.MultiIndex.from_product([[game_index], result.columns],
                                                     names=self.results.columns.names)
         self.results = pd.concat([self.results, result], axis=1)
         return self
+
+    @property
+    def __game_index(self):
+        return int(max(col[0] for col in [
+            *Data().placements.columns,
+            *Data().shots.columns,
+            *Data().results.columns,
+        ])) + 1
