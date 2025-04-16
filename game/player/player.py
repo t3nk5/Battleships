@@ -61,10 +61,12 @@ class Player:
     def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None, turn: int) -> ShotResultData:
         coordinates = coordinates or Coordinates.select()
         result = player_attacked.defensive_grid.get_shot(coordinates)
-        self.offensive_grid.get_shot(coordinates, result.touched)
+
+        if not result.already_shot:
+            self.offensive_grid.get_shot(coordinates, result.touched)
 
         if result.sunken:
-            self.ship_placement_datas[Ship.case_data(
+            player_attacked.ship_placement_datas[Ship.case_data(
                 player_attacked.defensive_grid[coordinates.x, coordinates.y].value
             ).ID].death_turn = turn
 
