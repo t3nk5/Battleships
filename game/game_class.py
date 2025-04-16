@@ -16,6 +16,7 @@ class Game:
         self.datas = {
             'placements': pd.DataFrame(columns=[0, 1]),
             'shots': pd.DataFrame(columns=[0, 1]),
+            'result': pd.DataFrame({0: False, 1: False}, index=['winner']),
         }
 
     @property
@@ -87,5 +88,6 @@ class Game:
 
         for index, player in enumerate(self.players):
             self.datas['placements'][index] = player.ship_placement_datas
+        self.datas['result'].loc['winner', self._player_index] = True
 
         Prompt.get('Press enter to continue', expected_type=str, authorized_empty_entry=True)
