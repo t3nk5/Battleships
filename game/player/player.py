@@ -34,40 +34,42 @@ class Player:
         for ship_type, number in ships.items():
             for i in range(number):
                 boat_id += 1
-                ship = ship_type(ship_id=boat_id)
-
-                clear()
-                while True:
-                    print(f'{self.name} grid initialization:', end='\n\n')
-                    print(f'{self.defensive_grid}', end='\n\n')
-                    print(f'You are currently placing a {type(ship).__name__} => size: {ship.size}', end='\n\n')
-
-                    try:
-                        self.defensive_grid.place_boat(ship,
-                                                       direction := select_direction(),
-                                                       coordinates := Coordinates.select())
-                        self.ship_placement_datas[ship.id] = ShipPlacementData(
-                            ship_type=ship.type_id,
-                            coordinates=coordinates,
-                            axis=direction,
-                        )
-                        break
-                    except Grid.Exceptions.Placement as e:
-                        clear()
-                        print(e.message, end='\n\n')
+                self.place_ship(ship_type(ship_id=boat_id))
 
         self.defensive_grid.initialized = True
 
+    def place_ship(self, ship: Ship):
+        clear()
+        while True:
+            print(f'{self.name} grid initialization:', end='\n\n')
+            print(f'{self.defensive_grid}', end='\n\n')
+            print(f'You are currently placing a {type(ship).__name__} => size: {ship.size}', end='\n\n')
+
+            try:
+                self.defensive_grid.place_boat(ship,
+                                               direction := select_direction(),
+                                               coordinates := Coordinates.select())
+                self.ship_placement_datas[ship.id] = ShipPlacementData(
+                    ship_type=ship.type_id,
+                    coordinates=coordinates,
+                    axis=direction,
+                )
+                break
+            except Grid.Exceptions.Placement as e:
+                clear()
+                print(e.message, end='\n\n')
+
     def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None, turn: int) -> ShotResultData:
         coordinates = coordinates or Coordinates.select()
-        result = player_attacked.defensive_grid.get_shot(coordinates)
+        return self.apply_shot_result(player_attacked.defensive_grid.get_shot(coordinates), player_attacked, turn)
 
-        if not result.already_shot:
-            self.offensive_grid.get_shot(coordinates, result.touched)
+    def apply_shot_result(self, shot_result: ShotResultData, player_attacked: 'Player', turn: int) -> ShotResultData:
+        if not shot_result.already_shot:
+            self.offensive_grid.get_shot(shot_result.coordinates, shot_result.touched)
 
-        if result.sunken:
+        if shot_result.sunken:
             player_attacked.ship_placement_datas[Ship.case_data(
-                player_attacked.defensive_grid[coordinates.x, coordinates.y].value
+                player_attacked.defensive_grid[shot_result.coordinates.x, shot_result.coordinates.y].value
             ).ID].death_turn = turn
 
-        return result
+        return shot_result
