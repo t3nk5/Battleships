@@ -1,10 +1,11 @@
+from typing import Literal
 from game.game_class import Game
 from ia.data import Data
 from utils.prompt import clear, Prompt
 
 
-def play_game():
-    game = Game('PvP')
+def play_game(game_mode: Literal['PvP', 'PvIA', 'IAvIA', 'Test']):
+    game = Game(game_mode)
     game.initiate()
     game.play()
     game.end()
@@ -24,7 +25,10 @@ if __name__ == "__main__":
             ).element:
                 case 'Play a game':
                     clear(1)
-                    play_game()
+                    play_game(Prompt.select(
+                        'Select Game Mode:',
+                        choices=['PvP', 'PvIA', 'IAvIA'],
+                    ).element)
                 case 'View statistics':
                     print('Not Implemented yet')
                 case 'Quit':
