@@ -60,17 +60,32 @@ class Data:
         return df[selected_cols]
 
     @staticmethod
-    def load():
+    def load(message: bool = True):
         try:
             Data().placements = pd.read_csv(Data.__files['placements'], sep=';', header=[0, 1], index_col=0).map(
                 lambda x: ShipPlacementData.parse(x) if isinstance(x, str) else x)
+            if message:
+                print('Placements data loaded.')
+        except FileNotFoundError:
+            if message:
+                print('No placements data found.')
+
+        try:
             Data().shots = pd.read_csv(Data.__files['shots'], sep=';', header=[0, 1], index_col=0).map(
                 lambda x: ShotResultData.parse(x) if isinstance(x, str) else x)
-            Data().results = pd.read_csv(Data.__files['results'], sep=';', header=[0, 1], index_col=0)
-
-            print('Data loaded.')
+            if message:
+                print('Shots data loaded.')
         except FileNotFoundError:
-            print('No data found.')
+            if message:
+                print('No shots data found.')
+
+        try:
+            Data().results = pd.read_csv(Data.__files['results'], sep=';', header=[0, 1], index_col=0)
+            if message:
+                print('Results data loaded.')
+        except FileNotFoundError:
+            if message:
+                print('No results data found.')
         return Data()
 
     @staticmethod
