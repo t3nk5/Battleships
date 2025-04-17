@@ -2,8 +2,6 @@ import random
 import pygame
 
 
-
-
 def createGameGrid(rows, cols, cellsize, pos):
     startX = pos[0]
     startY = pos[1]
@@ -81,8 +79,6 @@ def loadSpriteSheetImages(spriteSheet, rows, cols, newSize, size):
 def increaseAnimationImage(imageList, ind):
     return imageList[ind]
 
-
-
 def sortFleet(ship, shiplist):
     shiplist.remove(ship)
     shiplist.append(ship)
@@ -130,25 +126,31 @@ def pick_random_ship_location(gameLogic):
 
     return (posX, posY)
 
-
-def displayRadarScanner(imagelist, indnum, SCANNER):
-    if SCANNER == True and indnum <= 359:
-        image = increaseAnimationImage(imagelist, indnum)
-        return image
+def takeTurns(p1, p2):
+    if p1.turn == True:
+        p2.turn = False
     else:
-        return False
+        p2.turn = True
+        if not p2.makeAttack(pGameLogic):
+            p1.turn = True
 
+def checkForWinners(grid):
+    validGame = True
+    for row in grid:
+        if 'O' in row:
+            validGame = False
+    return validGame
 
-
-
-
-
+def shipLabelMaker(msg):
+    textMessage = pygame.font.SysFont('Stencil', 22)
+    textMessage = textMessage.render(msg, 1, (0, 17, 167))
+    textMessage = pygame.transform.rotate(textMessage, 90)
+    return textMessage
 
 
 CELLSIZE = 50
 ROWS = 10
 COLS = 10
-
 
 pGameLogic = createGameLogic(ROWS, COLS)
 
