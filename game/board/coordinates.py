@@ -92,6 +92,16 @@ class Coordinates:
     def y(self):
         return self._y.value
 
+    def get_adjacents(self) -> list['Coordinates']:
+        coordinates: list[Coordinates] = []
+        dirs = [('v', -1), ('v', 1), ('h', -1), ('h', 1)]
+        for axis, value in dirs:
+            try:
+                coordinates.append(self + (axis, value))
+            except IndexError:
+                pass
+        return coordinates
+
     @staticmethod
     def select() -> 'Coordinates':
         coordinates = Coordinates.parse(
