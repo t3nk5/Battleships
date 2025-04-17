@@ -72,7 +72,7 @@ class IA(Player):
         return best_placements
 
     @staticmethod
-    def _random_placement():
+    def __random_placement():
         return {
             'coordinates': str(Coordinates.random()),
             'axis': random_direction(),
