@@ -148,6 +148,8 @@ def shipLabelMaker(msg):
     return textMessage
 
 
+
+
 CELLSIZE = 50
 ROWS = 10
 COLS = 10

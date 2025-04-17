@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from utils import COLS, ROWS, CELLSIZE, createGameGrid, createGameLogic, printGameLogic, updateGameLogic, loadImage, loadSpriteSheetImages, increaseAnimationImage, loadAnimationImages, sortFleet, pGameLogic, cGameLogic, randomizeShipPositions, deploymentPhase, pick_random_ship_location, takeTurns, checkForWinners, shipLabelMaker, displayShipNames
+from utils import COLS, ROWS, CELLSIZE, createGameGrid, createGameLogic, printGameLogic, updateGameLogic, loadImage, loadSpriteSheetImages, increaseAnimationImage, loadAnimationImages, sortFleet, pGameLogic, cGameLogic, randomizeShipPositions, deploymentPhase, pick_random_ship_location, takeTurns, checkForWinners, shipLabelMaker
 
 
 pygame.init()
@@ -394,6 +394,15 @@ def createFleet():
                  FLEET[name][7])
         )
     return fleet
+
+def displayShipNames(window):
+     shipLabels = []
+     for ship in ['carrier', 'battleship', 'cruiser', 'destroyer', 'submarine', 'patrol boat', 'rescue boat']:
+         shipLabels.append(shipLabelMaker(ship))
+     startPos = 25
+     for item in shipLabels:
+         window.blit(item, (startPos, 600))
+         startPos += 75
 
 def mainMenuScreen(window):
     window.fill((0, 0, 0))
