@@ -27,10 +27,16 @@ class Coordinate:
         self.value = value
 
     def __add__(self, added: int):
-        return self.Values[self.Values.index(self.value) + added]
+        index = self.Values.index(self.value) + added
+        if index < 0:
+            raise IndexError('list index out of range')
+        return self.Values[index]
 
     def __str__(self):
         return str(self.value)
+
+    def __eq__(self, other: 'Coordinate'):
+        return self.value == other.value
 
     def valid(self, value) -> bool:
         return value in self.Values
@@ -68,6 +74,16 @@ class Coordinates:
     def __str__(self):
         return f'{self._x}{self._y}'
 
+    def __eq__(self, other: 'Coordinates'):
+        return self._x == other._x and self._y == other._y
+
+    def __add__(self, keys: tuple[directions, int]) -> 'Coordinates':
+        axis, value = keys
+        return Coordinates(
+            x=str(self[axis] + value if axis in ['horizontal', 'h'] else self['h'].value),
+            y=(self[axis] + value if axis in ['vertical', 'v'] else self['v'].value),
+        )
+
     @property
     def x(self):
         return self._x.value
@@ -100,7 +116,7 @@ class Coordinates:
         def parse_str(string: str) -> tuple[Coordinates.Vertical.Type | None, Coordinates.Horizontal.Type | None]:
             match = re.fullmatch(r"\s*([A-Za-z]?)\s*(-?\d+|\d+)?\s*", string)
             if match:
-                x = (match.group(1) if match.group(1) in Coordinates.Vertical.Values else None) or None
+                x = (match.group(1).upper() if match.group(1).upper() in Coordinates.Vertical.Values else None) or None
                 y = match.group(2)
                 if y:
                     if re.fullmatch(r"-?\d+", y):
