@@ -18,6 +18,8 @@ class IA(Player):
     def place_ship(self, ship: Ship):
         placement_index = 0
         best_placements = self._get_best_placements()[ship.type_id]
+        best_placements = best_placements[: int(len(best_placements) * 0.1) + 1]
+        np.random.shuffle(best_placements)
 
         while True:
             try:
@@ -70,9 +72,9 @@ class IA(Player):
         return best_placements
 
     @staticmethod
-    def __random_placement():
+    def _random_placement():
         return {
-            'coordinates': Coordinates.random(),
+            'coordinates': str(Coordinates.random()),
             'axis': random_direction(),
         }
 
