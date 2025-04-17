@@ -1,3 +1,4 @@
+import time
 import pygame
 import random
 
@@ -148,6 +149,7 @@ class Ship:
         window.blit(self.image, self.rect)
         for guns in self.gunslist:
             guns.draw(window, self)
+        
 
 
 class Guns:
@@ -255,11 +257,10 @@ class Button:
 
     def updateButtons(self, gameStatus):
         if self.name == 'Deploy' and gameStatus == False:
-            self.name = ' '
-        if self.name == 'Randomize' and gameStatus == False:
-            self.name = ' '
-        elif self.name == 'Quit' and gameStatus == True:
-            self.name = ' '
+            self.name = 'Deploy'
+        elif self.name == 'Randomize' and gameStatus == False:
+            self.name = 'Quit'
+        
         self.msg = self.addText(self.name)
         self.msgRect = self.msg.get_rect(center=self.rect.center)
 
@@ -476,8 +477,7 @@ SCREENWIDTH = 1260
 SCREENHEIGHT = 960
 
 DEPLOYMENT = True
-SCANNER = False
-INDNUM = 0
+
 BLIPPOSITION = None
 TURNTIMER = pygame.time.get_ticks()
 GAMESTATE = 'Main Menu'
@@ -502,6 +502,7 @@ FLEET = {
     'rescue ship': ['rescue ship', 'ui/assets/images/ships/rescue ship/rescue ship.png', (500, 600), (20, 95),
                     0, '', None, None]
 }
+
 STAGE = ['Main Menu', 'Deployment', 'Game Over']
 
 pGameGrid = createGameGrid(ROWS, COLS, CELLSIZE, (50, 50))
@@ -554,8 +555,6 @@ computer = EasyComputer()
 RUNGAME = True
 if __name__ == '__main__':
     while RUNGAME:
-
-
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 RUNGAME = False
@@ -584,7 +583,6 @@ if __name__ == '__main__':
                             elif (button.name == 'Player vs IA' or button.name == 'IA Vs IA') and button.active == True:
                                 if button.name == 'Player vs IA':
                                     computer = EasyComputer()
-
                                 elif button.name == 'IA Vs IA':
                                     ##ia vs ia a mettre ici
                                     pass
@@ -612,13 +610,22 @@ if __name__ == '__main__':
                                 ship.rotateShip(True)
 
         updateGameScreen(GAMESCREEN, GAMESTATE)
-        if SCANNER == True:
-            INDNUM += 1
+    
 
         if GAMESTATE == 'Deployment' and DEPLOYMENT != True:
             player1Wins = checkForWinners(cGameLogic)
             computerWins = checkForWinners(pGameLogic)
             if player1Wins == True or computerWins == True:
+                if player1Wins == True:
+                    computer.status = computer.computerStatus('Player Win')
+                    continue
+                elif computerWins == True:
+                    computer.status = computer.computerStatus('IA WIN')
+                    continue
+                
+                updateGameScreen(GAMESCREEN, GAMESTATE)
+                pygame.display.flip()
+                time.sleep(5)
                 GAMESTATE = STAGE[2]
 
         takeTurns(player1, computer)
