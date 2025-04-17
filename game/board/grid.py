@@ -88,11 +88,13 @@ class Grid:
     def __repr__(self):
         return str(self.grid)
 
-    def __getitem__(self, keys: tuple[
+    def __getitem__(self, keys: Union[
+        tuple[
         'Coordinates.Vertical.Type',
-        'Coordinates.Horizontal.Type']
+        'Coordinates.Horizontal.Type'
+        ], Coordinates]
                     ) -> Case.Offensive | Case.Defensive:
-        x, y = keys
+        x, y = keys if isinstance(keys, tuple) else (keys.x, keys.y)
         value = self.grid.loc[y, x]
 
         match self.type:
@@ -114,6 +116,14 @@ class Grid:
                 return value
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+
+    def __setitem__(self, keys: Union[
+        tuple[
+        'Coordinates.Vertical.Type',
+        'Coordinates.Horizontal.Type'
+        ], Coordinates] , value: float):
+        x, y = keys if isinstance(keys, tuple) else (keys.x, keys.y)
+        self.grid.loc[y, x] = value
 
     @property
     def ships(self):
