@@ -1,7 +1,10 @@
 import pygame
 import random
 
-from utils import COLS, ROWS, CELLSIZE, createGameGrid, createGameLogic, printGameLogic, updateGameLogic, loadImage, loadSpriteSheetImages, increaseAnimationImage, loadAnimationImages, sortFleet, pGameLogic, cGameLogic, randomizeShipPositions, deploymentPhase, pick_random_ship_location, takeTurns, checkForWinners, shipLabelMaker
+
+from game.game_class import Game
+from utils.graphics import COLS, ROWS, CELLSIZE, createGameGrid, createGameLogic, printGameLogic, updateGameLogic, loadImage, loadSpriteSheetImages, increaseAnimationImage, loadAnimationImages, sortFleet, pGameLogic, cGameLogic, randomizeShipPositions, deploymentPhase, pick_random_ship_location, takeTurns, checkForWinners, shipLabelMaker
+from utils.prompt import Prompt, clear
 
 
 pygame.init()
@@ -59,7 +62,7 @@ class Ship:
 
 
     def rotateShip(self, doRotation=False):
-        
+
         if self.active or doRotation == True:
             if self.rotation == False:
                 self.rotation = True
@@ -296,7 +299,7 @@ class EasyComputer:
     def __init__(self):
         self.turn = False
         self.status = self.computerStatus('Thinking')
-        self.name = 'Easy Computer'
+        self.name = 'Player vs IA'
 
 
     def computerStatus(self, msg):
@@ -409,7 +412,7 @@ def mainMenuScreen(window):
     window.blit(MAINMENUIMAGE, (0, 0))
 
     for button in BUTTONS:
-        if button.name in ['Easy Computer', 'Hard Computer']:
+        if button.name in ['Player vs IA', 'IA Vs IA']:
             button.active = True
             button.draw(window)
         else:
@@ -441,7 +444,7 @@ def deploymentScreen(window):
 
     computer.draw(window)
 
-    
+
     for token in TOKENS:
         token.draw(window)
 
@@ -453,7 +456,7 @@ def endScreen(window):
     window.blit(ENDSCREENIMAGE, (0, 0))
 
     for button in BUTTONS:
-        if button.name in ['Easy Computer', 'Hard Computer', 'Quit']:
+        if button.name in ['Player vs IA', 'IA Vs IA', 'Quit']:
             button.active = True
             button.draw(window)
         else:
@@ -522,8 +525,8 @@ BUTTONIMAGE1 = loadImage('ui/assets/images/buttons/button.png', (250, 100))
 BUTTONS = [
     Button(BUTTONIMAGE, (150, 50), (25, 900), 'Randomize'),
     Button(BUTTONIMAGE, (150, 50), (375, 900), 'Deploy'),
-    Button(BUTTONIMAGE1, (250, 100), (900, SCREENHEIGHT // 2 - 150), 'Easy Computer'),
-    Button(BUTTONIMAGE1, (250, 100), (900, SCREENHEIGHT // 2 + 150), 'Hard Computer')
+    Button(BUTTONIMAGE1, (250, 100), (900, SCREENHEIGHT // 2 - 150), 'Player vs IA'),
+    Button(BUTTONIMAGE1, (250, 100), (900, SCREENHEIGHT // 2 + 150), 'IA Vs IA')
 ]
 REDTOKEN = loadImage('ui/assets/images/tokens/redtoken.png', (CELLSIZE, CELLSIZE))
 GREENTOKEN = loadImage('ui/assets/images/tokens/greentoken.png', (CELLSIZE, CELLSIZE))
@@ -578,11 +581,11 @@ if __name__ == '__main__':
                                 DEPLOYMENT = status
                             elif button.name == 'Quit' and button.active == True:
                                 RUNGAME = False
-                            elif (button.name == 'Easy Computer' or button.name == 'Hard Computer') and button.active == True:
-                                if button.name == 'Easy Computer':
+                            elif (button.name == 'Player vs IA' or button.name == 'IA Vs IA') and button.active == True:
+                                if button.name == 'Player vs IA':
                                     computer = EasyComputer()
 
-                                elif button.name == 'Hard Computer':
+                                elif button.name == 'IA Vs IA':
                                     ##ia vs ia a mettre ici
                                     pass
                                 if GAMESTATE == 'Game Over':
@@ -590,7 +593,7 @@ if __name__ == '__main__':
                                     for ship in pFleet:
                                         ship.returnToDefaultPosition()
                                     randomizeShipPositions(cFleet, cGameGrid)
-                                    
+
                                     updateGameLogic(pGameGrid, pFleet, pGameLogic)
                                     updateGameLogic(cGameGrid, cFleet, cGameLogic)
                                     status = deploymentPhase(DEPLOYMENT)
@@ -621,3 +624,32 @@ if __name__ == '__main__':
         takeTurns(player1, computer)
 
     pygame.quit()
+
+
+def play_game():
+    game = Game('PvP')
+    game.initiate()
+    game.play()
+    game.end()
+
+
+# if __name__ == "__main__":
+#     clear(0)
+
+#     while True:
+#         print(f'Welcome to Battleship Game !')
+#         match Prompt.select(
+#             'Select:',
+#             choices=['Play a game', 'View statistics', 'Quit'],
+#         ).element:
+#             case 'Play a game':
+#                 clear(1)
+#                 play_game()
+#             case 'View statistics':
+#                 print('Not Implemented yet')
+#             case 'Quit':
+#                 print()
+#                 break
+
+#         clear(2)
+#     print('Thanks for playing!')
