@@ -3,6 +3,7 @@ from typing import Literal
 
 import pandas as pd
 
+from game.player.ia_class import IA
 from game.player.player import Player
 from utils.prompt import Prompt, clear
 
@@ -39,9 +40,15 @@ class Game:
                     Player(Prompt.get('Enter player 2 name: ', expected_type=str)),
                 ])
             case 'PvIA':
-                raise ValueError('Not implemented yet')
+                self.players.extend([
+                    Player(Prompt.get('Enter player name: ', expected_type=str)),
+                    IA(),
+                ])
             case 'IAvIA':
-                raise ValueError('Not implemented yet')
+                self.players.extend([
+                    IA(1),
+                    IA(2),
+                ])
             case 'Test':
                 pass
             case _:
@@ -60,10 +67,14 @@ class Game:
     def turn(self):
         clear(2)
         print(f'Player {self.current_player.name} turn:\n')
-        print(self.current_player)
+        if not isinstance(self.current_player, IA):
+            print(self.current_player)
         print()
 
         shot_result = self.current_player.shot(self.next_player, turn=int(self.turn_index))
+
+        if isinstance(self.current_player, IA):
+            print(f'{self.current_player.name} has shot in {shot_result.coordinates}')
         print(('Touched' + (', Sunk' if shot_result.sunken else '') if shot_result.touched else 'Missed') + ' !')
         self.datas['shots'].loc[int(self.turn_index), self._player_index] = shot_result
         self.turn_index += 0.5
