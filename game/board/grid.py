@@ -1,3 +1,4 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
 from typing import Union, cast
@@ -60,6 +61,7 @@ class Grid:
     class Type(Enum):
         OFFENSIVE = 0
         DEFENSIVE = 1
+        SHOTS = 2
 
     def __init__(self, grid_type: Type):
         self.type: Grid.Type = grid_type
@@ -108,6 +110,8 @@ class Grid:
                     is_shot=bool(round(abs(value * 1000) % 10, 0)),
                     ship_info=Ship.case_data(value) if not is_empty else None,
                 )
+            case Grid.Type.SHOTS:
+                return value
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
 
@@ -137,7 +141,7 @@ class Grid:
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
-            raise Grid.Exceptions.Type('A grid must be “DEFENSIVE” to accommodate a boat.')
+            raise Grid.Exceptions.Type('A grid must be “DEFENSIVE” to accommodate a boat. Current type: {self.type}')
 
         try:
             end_coordinate = coordinates[direction] + (boat.size - 1)
@@ -193,6 +197,18 @@ class Grid:
                 return ShotResultData(coordinates=coordinates)
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+            
+    def initialization(self, shots_data: pd.DataFrame) -> 'Grid':
+        if self.type != Grid.Type.SHOTS:
+            raise Grid.Exceptions.Type('A grid must be “SHOTS” to be initialized. Current type: {self.type}')
+         
+        dict_heatmap = defaultdict(list)
+        for cell in shots_data.to_numpy().flatten():
+            if isinstance(cell, ShotResultData):
+                dict_heatmap[str(cell.coordinates)].append(1.5 if cell.touched else 0)
+        for coord, values in dict_heatmap.items():
+            self[Coordinates.parse(coord)] = np.average(values)
+        return self
 
 
 @dataclass
