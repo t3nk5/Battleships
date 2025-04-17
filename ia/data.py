@@ -140,8 +140,10 @@ class Data:
 
     @property
     def __game_index(self):
-        return int(max(col[0] for col in [
+        cols = [
             *Data().placements.columns,
             *Data().shots.columns,
             *Data().results.columns,
-        ])) + 1
+        ]
+        if len(cols) == 0 : return 0
+        return int(max(col[0] for col in cols)) + 1
