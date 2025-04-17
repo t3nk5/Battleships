@@ -1,6 +1,8 @@
 from collections import defaultdict
 from typing import Literal, cast
 
+import numpy as np
+
 from game.board.battleships import Ship
 from game.board.coordinates import Coordinates, random_direction, directions
 from game.board.grid import ShotResultData, ShipPlacementData, Grid
@@ -10,8 +12,8 @@ from ia.data import Data
 
 class IA(Player):
     def __init__(self, index: int | None = None):
-        super().__init__('IA' + (f'-{index}' if not index else ''))
-        Data.load()
+        super().__init__('IA' + (f'-{index}' if index is not None else ''))
+        self.shot_logic = ShotAI()
 
     def place_ship(self, ship: Ship):
         placement_index = 0
@@ -33,8 +35,12 @@ class IA(Player):
             except Grid.Exceptions.Placement:
                 placement_index += 1
 
-    def shot(self, player_attacked: 'Player', *, coordinates: Coordinates | None = None, turn: int) -> ShotResultData:
-        pass
+    def shot(self, player_attacked: 'Player', *, _: Coordinates | None = None, turn: int) -> ShotResultData:
+        coordinates = self.shot_logic.get_shot_coordinates()
+        shot_result = self.apply_shot_result(player_attacked.defensive_grid.get_shot(coordinates), player_attacked,
+                                             turn)
+        self.shot_logic.update(shot_result)
+        return shot_result
 
     @staticmethod
     def _get_best_placements():
@@ -69,3 +75,51 @@ class IA(Player):
             'coordinates': Coordinates.random(),
             'axis': random_direction(),
         }
+
+
+class ShotAI:
+    def __init__(self):
+        self.heatmap = Grid(Grid.Type.SHOTS).initialization(Data().shots)
+        self.targets: dict[str, list[str]] = defaultdict(list)
+
+    def get_shot_coordinates(self) -> Coordinates:
+        max_value = self.heatmap.grid.values.max()
+
+        row_indices, col_indices = np.where(self.heatmap.grid.values == max_value)
+        max_coords = [
+            f"{Coordinates.Vertical.Values[col]}{Coordinates.Horizontal.Values[row]}"
+            for row, col in zip(row_indices, col_indices)
+        ]
+        print(max_coords)
+        return Coordinates.parse(np.random.choice(max_coords))
+
+    def update(self, result: ShotResultData):
+        self.heatmap[result.coordinates] -= 10
+
+        if result.already_shot:
+            self.heatmap[result.coordinates] -= 5
+
+        if result.touched and not result.sunken:
+            if result.coordinates in self.target_list:
+                self.remove_targets(result.coordinates)
+            self.add_targets(result.coordinates)
+
+        if result.sunken and result.coordinates in self.target_list:
+            self.remove_targets(result.coordinates)
+
+    @property
+    def target_list(self):
+        return [target for sublist in self.targets.values() for target in sublist]
+
+    def add_targets(self, coordinate: Coordinates):
+        adjacents = coordinate.get_adjacents()
+
+        for coord in adjacents: self.heatmap[coord] += 3
+        self.targets[str(coordinate)].extend(adjacents)
+
+    def remove_targets(self, coordinate: Coordinates):
+        keys_targets = [k for k, v in self.targets.items() if coordinate in v]
+        for key in keys_targets:
+            for coord in self.targets[key]:
+                self.heatmap[coord] -= 3
+            del self.targets[key]
