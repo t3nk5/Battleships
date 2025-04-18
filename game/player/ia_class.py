@@ -81,7 +81,7 @@ class IA(Player):
 
 class ShotAI:
     def __init__(self):
-        self.heatmap = Grid(Grid.Type.SHOTS).initialization(Data().shots)
+        self.heatmap = Grid(Grid.Type.SHOTS).initialization(Data().shots, 1.5)
         self.targets: dict[str, list[str]] = defaultdict(list)
 
     def get_shot_coordinates(self) -> Coordinates:
