@@ -5,7 +5,6 @@ from typing import Literal
 import pandas as pd
 
 from game.board.grid import ShipPlacementData, ShotResultData
-from game.game_class import Game
 
 
 class Data:
