@@ -2,11 +2,23 @@ from time import sleep
 from typing import Literal
 
 from game.player.player import Player
+from ui.player.player_ui import PlayerUI
 from utils.prompt import Prompt, clear
 
 
-class Game:
-    def __init__(self, mode: Literal['PvP', 'PvIA', 'IAvIA']):
+class GameLogic:
+    PLAYERS_TYPES: dict[Literal['terminal', 'graphical'], dict[Literal['player', 'ia'], type[Player]]] = {
+        'terminal': {
+            'player': Player,
+            'ia': None,
+        },
+        'graphical': {
+            'player': PlayerUI,
+            'ia': None,
+        },
+    }
+
+    def __init__(self, mode: Literal['PvP', 'PvIA', 'IAvIA'], type: Literal['terminal', 'graphical']):
         self.mode = mode
         self.players: list[Player] = []
         self._player_index = 0
@@ -14,8 +26,8 @@ class Game:
         match self.mode:
             case 'PvP':
                 self.players.extend([
-                    Player(Prompt.get('Enter player 1 name: ', expected_type=str)),
-                    Player(Prompt.get('Enter player 2 name: ', expected_type=str)),
+                    self.PLAYERS_TYPES[type]['player'](Prompt.get('Enter player 1 name: ', expected_type=str) if type == 'terminal' else 'P1'),
+                    self.PLAYERS_TYPES[type]['player'](Prompt.get('Enter player 2 name: ', expected_type=str) if type == 'terminal' else 'P2'),
                 ])
             case 'PvIA':
                 raise ValueError('Not implemented yet')
@@ -46,15 +58,18 @@ class Game:
         clear(1)
         print(f'Grids initialized !')
 
+    def turn(self):
+        clear(2)
+        print(f'Player {self.current_player.name} turn:\n')
+        print(self.current_player)
+        print()
+
+        result = self.current_player.shot(self.next_player)
+        print(('Touched' + (', Sunk' if result.sunken else '') if result.touched else 'Missed') + ' !')
+
     def play(self):
         while True:
-            clear(2)
-            print(f'Player {self.current_player.name} turn:\n')
-            print(self.current_player)
-            print()
-
-            result = self.current_player.shot(self.next_player)
-            print(('Touched' + (', Sunk' if result.sunken else '') if result.touched else 'Missed') + ' !')
+            self.turn()
 
             if not self.next_player.defensive_grid.alive: break
 

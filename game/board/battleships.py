@@ -81,9 +81,9 @@ class PatrolBoat(Ship):  # 1
 
 
 ship_ids = {
-    Carrier: 1,
-    Battleship: 2,
-    Destroyer: 3,
-    Submarine: 4,
-    PatrolBoat: 5,
+    Carrier: 1, # size: 5
+    Battleship: 2, # size: 4
+    Destroyer: 3, # size: 3
+    Submarine: 4, # size: 3
+    PatrolBoat: 5, # size: 2
 }

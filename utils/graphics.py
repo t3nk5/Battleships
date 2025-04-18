@@ -1,6 +1,8 @@
 import random
 import pygame
 
+from ui.assets.screen import CELLSIZE, COLS, ROWS
+
 
 def createGameGrid(rows, cols, cellsize, pos):
     startX = pos[0]
@@ -16,6 +18,7 @@ def createGameGrid(rows, cols, cellsize, pos):
         startY += cellsize
     return coordGrid
 
+
 def createGameLogic(rows, cols):
     gamelogic = []
     for row in range(rows):
@@ -24,6 +27,7 @@ def createGameLogic(rows, cols):
             rowX.append(' ')
         gamelogic.append(rowX)
     return gamelogic
+
 
 def updateGameLogic(coordGrid, shiplist, gamelogic):
     for i, rowX in enumerate(coordGrid):
@@ -36,6 +40,7 @@ def updateGameLogic(coordGrid, shiplist, gamelogic):
                     if pygame.rect.Rect(colX[0], colX[1], CELLSIZE, CELLSIZE).colliderect(ship.rect):
                         gamelogic[i][j] = 'O'
 
+
 def showGridOnScreen(window, cellsize, playerGrid, computerGrid):
     gamegrids = [playerGrid, computerGrid]
     for grid in gamegrids:
@@ -43,45 +48,11 @@ def showGridOnScreen(window, cellsize, playerGrid, computerGrid):
             for col in row:
                 pygame.draw.rect(window, (255, 255, 255), (col[0], col[1], cellsize, cellsize), 1)
 
-def printGameLogic():
-    print('Player Grid'.center(50, '#'))
-    for _ in pGameLogic:
-        print(_)
-    print('Computer Grid'.center(50, '#'))
-    for _ in cGameLogic:
-        print(_)
-
-def loadImage(path, size, rotate=False):
-    img = pygame.image.load(path).convert_alpha()
-    img = pygame.transform.scale(img, size)
-    if rotate == True:
-        img = pygame.transform.rotate(img, -90)
-    return img
-
-def loadAnimationImages(path, aniNum,  size):
-    imageList = []
-    for num in range(aniNum):
-        if num < 10:
-            imageList.append(loadImage(f'{path}00{num}.png', size))
-        elif num < 100:
-            imageList.append(loadImage(f'{path}0{num}.png', size))
-        else:
-            imageList.append(loadImage(f'{path}{num}.png', size))
-    return imageList
-
-def loadSpriteSheetImages(spriteSheet, rows, cols, newSize, size):
-    image = pygame.Surface((128, 128))
-    image.blit(spriteSheet, (0, 0), (rows * size[0], cols * size[1], size[0], size[1]))
-    image = pygame.transform.scale(image, (newSize[0], newSize[1]))
-    image.set_colorkey((0, 0, 0))
-    return image
-
-def increaseAnimationImage(imageList, ind):
-    return imageList[ind]
 
 def sortFleet(ship, shiplist):
     shiplist.remove(ship)
     shiplist.append(ship)
+
 
 def randomizeShipPositions(shiplist, gamegrid):
     placedShips = []
@@ -92,11 +63,11 @@ def randomizeShipPositions(shiplist, gamegrid):
             rotateShip = random.choice([True, False])
             if rotateShip == True:
                 yAxis = random.randint(0, 9)
-                xAxis = random.randint(0, 9 - (ship.hImage.get_width()//50))
+                xAxis = random.randint(0, 9 - (ship.hImage.get_width() // 50))
                 ship.rotateShip(True)
                 ship.rect.topleft = gamegrid[yAxis][xAxis]
             else:
-                yAxis = random.randint(0, 9 - (ship.vImage.get_height()//50))
+                yAxis = random.randint(0, 9 - (ship.vImage.get_height() // 50))
                 xAxis = random.randint(0, 9)
                 ship.rect.topleft = gamegrid[yAxis][xAxis]
             if len(placedShips) > 0:
@@ -110,11 +81,13 @@ def randomizeShipPositions(shiplist, gamegrid):
                 validPosition = True
         placedShips.append(ship)
 
+
 def deploymentPhase(deployment):
     if deployment == True:
         return False
     else:
         return True
+
 
 def pick_random_ship_location(gameLogic):
     validChoice = False
@@ -126,13 +99,15 @@ def pick_random_ship_location(gameLogic):
 
     return (posX, posY)
 
-def takeTurns(p1, p2):
+
+def takeTurns(p1, p2, ui):
     if p1.turn == True:
         p2.turn = False
     else:
         p2.turn = True
-        if not p2.makeAttack(pGameLogic):
+        if not p2.makeAttack(pGameLogic, ui):
             p1.turn = True
+
 
 def checkForWinners(grid):
     validGame = True
@@ -141,20 +116,7 @@ def checkForWinners(grid):
             validGame = False
     return validGame
 
-def shipLabelMaker(msg):
-    textMessage = pygame.font.SysFont('Stencil', 22)
-    textMessage = textMessage.render(msg, 1, (0, 17, 167))
-    textMessage = pygame.transform.rotate(textMessage, 90)
-    return textMessage
-
-
-
-
-CELLSIZE = 50
-ROWS = 10
-COLS = 10
 
 pGameLogic = createGameLogic(ROWS, COLS)
 
 cGameLogic = createGameLogic(ROWS, COLS)
-
