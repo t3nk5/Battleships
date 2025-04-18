@@ -25,9 +25,9 @@ class Player:
         ships = {
             Carrier: 1,
             Battleship: 1,
-            Destroyer: 2,
-            Submarine: 1,
-            PatrolBoat: 1,
+            Destroyer: 1,
+            Submarine: 2,
+            PatrolBoat: 2,
         }
 
         boat_id = 0

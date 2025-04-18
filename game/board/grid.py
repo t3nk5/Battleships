@@ -208,14 +208,14 @@ class Grid:
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
             
-    def initialization(self, shots_data: pd.DataFrame) -> 'Grid':
+    def initialization(self, shots_data: pd.DataFrame, touched_value: float) -> 'Grid':
         if self.type != Grid.Type.SHOTS:
             raise Grid.Exceptions.Type('A grid must be “SHOTS” to be initialized. Current type: {self.type}')
          
         dict_heatmap = defaultdict(list)
         for cell in shots_data.to_numpy().flatten():
             if isinstance(cell, ShotResultData):
-                dict_heatmap[str(cell.coordinates)].append(1.5 if cell.touched else 0)
+                dict_heatmap[str(cell.coordinates)].append(touched_value if cell.touched else 0)
         for coord, values in dict_heatmap.items():
             self[Coordinates.parse(coord)] = np.average(values)
         return self
