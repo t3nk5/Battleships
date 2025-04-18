@@ -1,6 +1,7 @@
 from typing import Literal
 from game.game_class import Game
 from ia.data import Data
+from ia.stats import Stats
 from utils.prompt import clear, Prompt
 
 
@@ -30,7 +31,7 @@ if __name__ == "__main__":
                         choices=['PvP', 'PvIA', 'IAvIA'],
                     ).element)
                 case 'View statistics':
-                    print('Not Implemented yet')
+                    Stats.select()
                 case 'Quit':
                     print()
                     break

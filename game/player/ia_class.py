@@ -92,7 +92,6 @@ class ShotAI:
             f"{Coordinates.Vertical.Values[col]}{Coordinates.Horizontal.Values[row]}"
             for row, col in zip(row_indices, col_indices)
         ]
-        print(max_coords)
         return Coordinates.parse(np.random.choice(max_coords))
 
     def update(self, result: ShotResultData):
