@@ -1,18 +1,18 @@
 import time
+
 import pygame
-import random
 
 from game.game_class import GameLogic
+from ia.data import Data
 from ui.player.temp_ia import EasyComputer
 from ui.ui_manager import UIManager
 from utils.graphics import checkForWinners, deploymentPhase, randomizeShipPositions, sortFleet, cGameLogic, pGameLogic, \
     takeTurns, updateGameLogic
-from utils.prompt import Prompt, clear
+from utils.prompt import clear, Prompt
 
 
 def play_graphical():
     pygame.init()
-
     ui_manager = UIManager()
     while ui_manager.is_running:
         for event in pygame.event.get():
@@ -89,27 +89,42 @@ def play_graphical():
 
 
 def play_terminal():
-    clear(0)
+    try:
+        Data.load()
+        clear(0)
 
-    while True:
-        print(f'Welcome to Battleship Game !')
-        match Prompt.select(
-            'Select:',
-            choices=['Play a game', 'View statistics', 'Quit'],
-        ).element:
-            case 'Play a game':
-                clear(1)
-                game = GameLogic('PvP', 'terminal')
-                game.initiate()
-                game.play()
-                game.end()
-            case 'View statistics':
-                print('Not Implemented yet')
-            case 'Quit':
-                print()
-                break
+        while True:
+            print(f'Welcome to Battleship Game !')
+            match Prompt.select(
+                'Select:',
+                choices=['Play a game', 'View statistics', 'Quit'],
+            ).element:
+                case 'Play a game':
+                    clear(1)
+                    game = GameLogic(Prompt.select(
+                        'Select Game Mode:',
+                        choices=['PvP', 'PvIA', 'IAvIA'],
+                    ).element)
+                    game.initiate()
+                    game.play()
+                    game.end()
+                    Data.add(game).save()
+                case 'View statistics':
+                    print('Not Implemented yet')
+                case 'Quit':
+                    print()
+                    break
 
-    clear(2)
+            clear(2)
+    except KeyboardInterrupt:
+        print('''
+
+===============================
+        Manual interrupt
+===============================
+''')
+
+    Data.save()
     print('Thanks for playing!')
 
 

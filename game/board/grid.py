@@ -1,6 +1,7 @@
+from collections import defaultdict
 from dataclasses import dataclass
 from enum import Enum
-from typing import Union
+from typing import Union, cast
 
 import numpy as np
 import pandas as pd
@@ -60,6 +61,7 @@ class Grid:
     class Type(Enum):
         OFFENSIVE = 0
         DEFENSIVE = 1
+        SHOTS = 2
 
     def __init__(self, grid_type: Type):
         self.type: Grid.Type = grid_type
@@ -86,9 +88,13 @@ class Grid:
     def __repr__(self):
         return str(self.grid)
 
-    def __getitem__(self, keys: tuple[
-        'Coordinates.Vertical.Type', 'Coordinates.Horizontal.Type']) -> Case.Offensive | Case.Defensive | Case.Offensive:
-        x, y = keys
+    def __getitem__(self, keys: Union[
+        tuple[
+        'Coordinates.Vertical.Type',
+        'Coordinates.Horizontal.Type'
+        ], Coordinates]
+                    ) -> Case.Offensive | Case.Defensive:
+        x, y = keys if isinstance(keys, tuple) else (keys.x, keys.y)
         value = self.grid.loc[y, x]
 
         match self.type:
@@ -106,8 +112,18 @@ class Grid:
                     is_shot=bool(round(abs(value * 1000) % 10, 0)),
                     ship_info=Ship.case_data(value) if not is_empty else None,
                 )
+            case Grid.Type.SHOTS:
+                return value
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+
+    def __setitem__(self, keys: Union[
+        tuple[
+        'Coordinates.Vertical.Type',
+        'Coordinates.Horizontal.Type'
+        ], Coordinates] , value: float):
+        x, y = keys if isinstance(keys, tuple) else (keys.x, keys.y)
+        self.grid.loc[y, x] = value
 
     @property
     def ships(self):
@@ -135,7 +151,7 @@ class Grid:
 
     def place_boat(self, boat: Ship, direction: directions, coordinates: Coordinates) -> 'Grid':
         if self.type != Grid.Type.DEFENSIVE:
-            raise Grid.Exceptions.Type('A grid must be “DEFENSIVE” to accommodate a boat.')
+            raise Grid.Exceptions.Type('A grid must be “DEFENSIVE” to accommodate a boat. Current type: {self.type}')
 
         try:
             end_coordinate = coordinates[direction] + (boat.size - 1)
@@ -165,7 +181,7 @@ class Grid:
 
         return self
 
-    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> Union['ShotResult', None]:
+    def get_shot(self, coordinates: Coordinates, touched: bool | None = None) -> Union['ShotResultData', None]:
         match self.type:
             case Grid.Type.OFFENSIVE:
                 if touched is not None:
@@ -174,26 +190,80 @@ class Grid:
             case Grid.Type.DEFENSIVE:
                 case_info = self[coordinates.x, coordinates.y]
 
-                if case_info.is_shot: return ShotResult(already_shot=True)
+                if case_info.is_shot: return ShotResultData(coordinates=coordinates, already_shot=True)
 
                 self.grid.loc[coordinates.y, coordinates.x] += 0.001
 
                 if not case_info.is_empty:
                     self.grid.loc[coordinates.y, coordinates.x] *= -1
-                    return ShotResult(
+                    return ShotResultData(
+                        coordinates=coordinates,
                         touched=True,
                         sunken=not Ship.ship_data(
                             self.ships[
                                 Ship.case_data(self.grid.loc[coordinates.y, coordinates.x]).ID
                             ]).alive
                     )
-                return ShotResult()
+                return ShotResultData(coordinates=coordinates)
             case _:
                 raise ValueError(f'Invalid grid type: {self.type}')
+            
+    def initialization(self, shots_data: pd.DataFrame, touched_value: float) -> 'Grid':
+        if self.type != Grid.Type.SHOTS:
+            raise Grid.Exceptions.Type('A grid must be “SHOTS” to be initialized. Current type: {self.type}')
+         
+        dict_heatmap = defaultdict(list)
+        for cell in shots_data.to_numpy().flatten():
+            if isinstance(cell, ShotResultData):
+                dict_heatmap[str(cell.coordinates)].append(touched_value if cell.touched else 0)
+        for coord, values in dict_heatmap.items():
+            self[Coordinates.parse(coord)] = np.average(values)
+        return self
 
 
 @dataclass
-class ShotResult:
+class ShipPlacementData:
+    ship_type: int
+    coordinates: Coordinates
+    axis: directions
+    death_turn: int | None = None
+
+    def __repr__(self):
+        return (f'{self.ship_type}'
+                f'.{self.coordinates}'
+                f'.{self.axis[0]}'
+                f'.{self.death_turn}')
+
+    @staticmethod
+    def parse(s: str) -> 'ShipPlacementData':
+        values = s.split('.')
+        return ShipPlacementData(
+            ship_type=int(values[0]),
+            coordinates=Coordinates.parse(values[1]),
+            axis=cast(directions, values[2]),
+            death_turn=int(values[3]) if values[3].isdigit() else None,
+        )
+
+
+@dataclass
+class ShotResultData:
+    coordinates: Coordinates
     already_shot: bool = False
     touched: bool = False
     sunken: bool = False
+
+    def __repr__(self):
+        return (f'{self.coordinates}'
+                f'.{int(self.already_shot)}'
+                f'.{int(self.touched)}'
+                f'.{int(self.sunken)}')
+
+    @staticmethod
+    def parse(s: str) -> 'ShotResultData':
+        values = s.split('.')
+        return ShotResultData(
+            coordinates=Coordinates.parse(values[0]),
+            already_shot=bool(int(values[1])),
+            touched=bool(int(values[2])),
+            sunken=bool(int(values[3])),
+        )

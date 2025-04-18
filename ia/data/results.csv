@@ -1,0 +1,5 @@
+game_index;0;0;1;1;2;2;3;3;4;4;5;5;6;6;7;7;8;8;9;9;10;10;11;11;12;12;13;13;14;14;15;15;16;16;17;17;18;18;19;19;20;20;21;21;22;22;23;23;25;25
+player_index;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1;0;1
+winner;True;False;True;False;True;False;False;True;False;True;True;False;True;False;True;False;True;False;False;True;True;False;True;False;True;False;True;False;False;True;False;True;True;False;True;False;True;False;True;False;False;True;True;False;False;True;False;True;True;False
+type;Player;IA;Player;IA;Player;Player;IA;IA;IA;IA;Player;IA;Player;IA;IA;IA;IA;IA;IA;IA;Player;IA;Player;IA;IA;IA;IA;IA;IA;IA;IA;IA;IA;IA;Player;Player;IA;IA;IA;IA;IA;IA;IA;IA;IA;IA;IA;IA;Player;IA
+name;COCO;IA;COCO;IA;COCO;TDC;IA-1;IA-2;IA-1;IA-2;COCO;IA;R1;IA;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;MOI;IA;MISTERFREEZE;IA;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;COCO;TEST;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;IA-1;IA-2;coco;IA

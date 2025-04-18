@@ -67,7 +67,7 @@ class Battleship(Ship):  # 1
 
 class Destroyer(Ship):  # 2
     def __init__(self, ship_id: int):
-        super().__init__(ship_id, size=3, ship_type_id=ship_ids[type(self)])
+        super().__init__(ship_id, size=4, ship_type_id=ship_ids[type(self)])
 
 
 class Submarine(Ship):  # 1

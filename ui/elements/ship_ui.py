@@ -117,6 +117,7 @@ class ShipUI:
         #  Ship is current selection
         self.active = False
         #  Load gun Images
+        self.gunCoordsOffset = values.guns_coords_offset
         self.gunslist: list[Gun] = [
             Gun(
                 values.gun_img_path,
